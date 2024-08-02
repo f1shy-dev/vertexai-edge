@@ -1,16 +1,28 @@
 {
   "name": "@google-cloud/vertexai",
-  "description": "Vertex Generative AI client for Node.js",
   "version": "1.4.0",
-  "license": "Apache-2.0",
   "author": "Google LLC",
+  "repository": "googleapis/nodejs-vertexai",
+  "main": "build/src/index.js",
+  "devDependencies": {
+    "@types/jasmine": "^5.1.2",
+    "@types/node": "^20.9.0",
+    "gts": "^5.2.0",
+    "jasmine": "^5.1.0",
+    "jasmine-reporters": "^2.4.0",
+    "jsdoc": "^4.0.0",
+    "jsdoc-fresh": "^3.0.0",
+    "jsdoc-region-tag": "^3.0.0",
+    "linkinator": "^4.0.0",
+    "typescript": "~5.2.0",
+    "nyc": "^15.1.0"
+  },
+  "description": "Vertex Generative AI client for Node.js",
   "engines": {
     "node": ">=18.0.0"
   },
   "homepage": "https://github.com/googleapis/nodejs-vertexai",
-  "repository": "googleapis/nodejs-vertexai",
-  "main": "build/src/index.js",
-  "type": "commonjs",
+  "license": "Apache-2.0",
   "scripts": {
     "clean": "gts clean",
     "compile": "tsc -p .",
@@ -35,20 +47,5 @@
     "cover:integration": "nyc --no-clean npm run system-test",
     "cover:report": "nyc report --reporter=lcov"
   },
-  "dependencies": {
-    "google-auth-library": "^9.1.0"
-  },
-  "devDependencies": {
-    "@types/jasmine": "^5.1.2",
-    "@types/node": "^20.9.0",
-    "gts": "^5.2.0",
-    "jasmine": "^5.1.0",
-    "jasmine-reporters": "^2.4.0",
-    "jsdoc": "^4.0.0",
-    "jsdoc-fresh": "^3.0.0",
-    "jsdoc-region-tag": "^3.0.0",
-    "linkinator": "^4.0.0",
-    "typescript": "~5.2.0",
-    "nyc": "^15.1.0"
-  }
+  "type": "commonjs"
 }

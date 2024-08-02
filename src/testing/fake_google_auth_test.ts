@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {GoogleAuth} from 'google-auth-library';
+import {GoogleAuth} from '~google-auth-library';
 
 import {createFakeGoogleAuth} from './fake_google_auth';
 

@@ -16,10 +16,10 @@
  */
 
 /* tslint:disable */
-import {GoogleAuth, GoogleAuthOptions} from 'google-auth-library';
+import {GoogleAuth, type GoogleAuthOptions} from '~google-auth-library';
 
 import {GenerativeModelPreview, GenerativeModel} from './models';
-import {
+import type {
   GetGenerativeModelParams,
   ModelParams,
   RequestOptions,
@@ -154,10 +154,10 @@ class VertexAIPreview {
    * @param location - location The Google Cloud project location to use for the
    *     request
    * @param googleAuth - The GoogleAuthen class instance from
-   *     google-auth-library.
+   *     ~google-auth-library.
    *        Complete list of authentication options is documented in the
    * GoogleAuthOptions interface:
-   *        https://github.com/googleapis/google-auth-library-nodejs/blob/main/src/auth/googleauth.ts
+   *        https://github.com/googleapis/~google-auth-library-nodejs/blob/main/src/auth/googleauth.ts
    * @param apiEndpoint - [apiEndpoint] The base Vertex AI endpoint to use for
    *     the request. If
    *        not provided, the default regionalized endpoint
@@ -242,7 +242,7 @@ function resolveProject(projectFromInput?: string): string {
   if (projectFromInput) {
     return projectFromInput;
   }
-  const inferredProjectFromEnv = process.env['GOOGLE_CLOUD_PROJECT'];
+  const inferredProjectFromEnv = process.env.GOOGLE_CLOUD_PROJECT;
   if (inferredProjectFromEnv) {
     return inferredProjectFromEnv;
   }
@@ -254,7 +254,7 @@ function resolveLocation(locationFromInput?: string): string {
     return locationFromInput;
   }
   const inferredLocation =
-    process.env['GOOGLE_CLOUD_REGION'] || process.env['CLOUD_ML_REGION'];
+    process.env.GOOGLE_CLOUD_REGION || process.env.CLOUD_ML_REGION;
   if (inferredLocation) {
     return inferredLocation;
   }

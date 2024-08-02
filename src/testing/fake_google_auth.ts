@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {GoogleAuth} from 'google-auth-library';
+import {GoogleAuth} from '~google-auth-library';
 
 interface FakeGoogleAuthParams {
   scopes?: string;

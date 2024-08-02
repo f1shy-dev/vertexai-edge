@@ -16,7 +16,7 @@
  */
 
 /* tslint:disable */
-import {GoogleAuth} from 'google-auth-library';
+import {GoogleAuth} from '~google-auth-library';
 
 import {formulateSystemInstructionIntoContent} from './util';
 import {

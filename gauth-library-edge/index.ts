@@ -26,19 +26,19 @@ export interface GoogleAuthOptions {
 }
 
 export class GoogleAuth {
-  private options: GoogleAuthOptions;
+  private options?: GoogleAuthOptions;
 
-  constructor(options: GoogleAuthOptions) {
+  constructor(options?: GoogleAuthOptions) {
     this.options = options;
   }
 
   async getAccessToken() {
     const clientEmail =
-      this.options.credentials?.client_email ||
+      this.options?.credentials?.client_email ||
       process.env.GOOGLE_SA_CLIENT_EMAIL;
 
     const privKey =
-      this.options.credentials?.private_key ||
+      this.options?.credentials?.private_key ||
       process.env.GOOGLE_SA_PRIVATE_KEY;
 
     if (!clientEmail) {
@@ -51,7 +51,7 @@ export class GoogleAuth {
 
     const payload = {
       iss: clientEmail,
-      scope: this.options.scopes,
+      scope: this.options?.scopes || '',
       aud: 'https://www.googleapis.com/oauth2/v4/token',
       exp: Math.floor(Date.now() / 1000) + 60 * 60,
       iat: Math.floor(Date.now() / 1000),
@@ -88,7 +88,7 @@ export class GoogleAuth {
         token_type: string;
       };
 
-      return token.access_token;
+      return token.access_token as string | null | undefined;
     } catch (error) {
       console.error(error);
       throw error;
