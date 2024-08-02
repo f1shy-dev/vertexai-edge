@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { GoogleAuth } from '~google-auth-library';
+import { GoogleAuth } from '../gauth-library-edge/index';
 import { GenerativeModelPreview, GenerativeModel } from './models';
 import type { ModelParams, RequestOptions, VertexInit } from './types/content';
 /**
@@ -102,10 +102,10 @@ declare class VertexAIPreview {
      * @param location - location The Google Cloud project location to use for the
      *     request
      * @param googleAuth - The GoogleAuthen class instance from
-     *     ~google-auth-library.
+     *     ../../gauth-library-edge/index.
      *        Complete list of authentication options is documented in the
      * GoogleAuthOptions interface:
-     *        https://github.com/googleapis/~google-auth-library-nodejs/blob/main/src/auth/googleauth.ts
+     *        https://github.com/googleapis/../../gauth-library-edge/index-nodejs/blob/main/src/auth/googleauth.ts
      * @param apiEndpoint - [apiEndpoint] The base Vertex AI endpoint to use for
      *     the request. If
      *        not provided, the default regionalized endpoint

@@ -16,7 +16,7 @@
  */
 
 /* tslint:disable */
-import {GoogleAuth, type GoogleAuthOptions} from '~google-auth-library';
+import {GoogleAuth, type GoogleAuthOptions} from '../gauth-library-edge/index';
 
 import {GenerativeModelPreview, GenerativeModel} from './models';
 import type {
@@ -154,10 +154,10 @@ class VertexAIPreview {
    * @param location - location The Google Cloud project location to use for the
    *     request
    * @param googleAuth - The GoogleAuthen class instance from
-   *     ~google-auth-library.
+   *     ../../gauth-library-edge/index.
    *        Complete list of authentication options is documented in the
    * GoogleAuthOptions interface:
-   *        https://github.com/googleapis/~google-auth-library-nodejs/blob/main/src/auth/googleauth.ts
+   *        https://github.com/googleapis/../../gauth-library-edge/index-nodejs/blob/main/src/auth/googleauth.ts
    * @param apiEndpoint - [apiEndpoint] The base Vertex AI endpoint to use for
    *     the request. If
    *        not provided, the default regionalized endpoint

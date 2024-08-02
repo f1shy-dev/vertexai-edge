@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { GoogleAuth, GoogleAuthOptions } from '~google-auth-library';
+import { GoogleAuth, GoogleAuthOptions } from '../../gauth-library-edge/index';
 /**
  * Params used to initialize the Vertex SDK.
  */
@@ -38,10 +38,10 @@ export declare interface VertexInit {
      */
     apiEndpoint?: string;
     /**
-     * Optional. The Authentication options provided by ~google-auth-library.
+     * Optional. The Authentication options provided by ../../gauth-library-edge/index.
      * Complete list of authentication options is documented in the
      * GoogleAuthOptions interface:
-     * https://github.com/googleapis/~google-auth-library-nodejs/blob/main/src/auth/googleauth.ts.
+     * https://github.com/googleapis/../../gauth-library-edge/index-nodejs/blob/main/src/auth/googleauth.ts.
      */
     googleAuthOptions?: GoogleAuthOptions;
 }
@@ -91,7 +91,7 @@ export declare interface GetGenerativeModelParams extends ModelParams {
     /**
      * GoogleAuth class instance that handles authentication.
      * Details about GoogleAuth is referred to
-     * https://github.com/googleapis/~google-auth-library-nodejs/blob/main/src/auth/googleauth.ts
+     * https://github.com/googleapis/../../gauth-library-edge/index-nodejs/blob/main/src/auth/googleauth.ts
      */
     googleAuth: GoogleAuth;
     /**

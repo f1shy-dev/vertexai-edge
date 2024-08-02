@@ -18,7 +18,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VertexAI = void 0;
 /* tslint:disable */
-const _google_auth_library_1 = require("~google-auth-library");
+const index_1 = require("../gauth-library-edge/index");
 const models_1 = require("./models");
 const errors_1 = require("./types/errors");
 /**
@@ -40,7 +40,7 @@ class VertexAI {
         const opts = validateGoogleAuthOptions(init.project, init.googleAuthOptions);
         this.location = resolveLocation(init.location);
         this.project = resolveProject(init.project);
-        this.googleAuth = new _google_auth_library_1.GoogleAuth(opts);
+        this.googleAuth = new index_1.GoogleAuth(opts);
         this.apiEndpoint = init.apiEndpoint;
         this.preview = new VertexAIPreview(this.project, this.location, this.googleAuth, this.apiEndpoint);
     }
@@ -123,10 +123,10 @@ class VertexAIPreview {
      * @param location - location The Google Cloud project location to use for the
      *     request
      * @param googleAuth - The GoogleAuthen class instance from
-     *     ~google-auth-library.
+     *     ../../gauth-library-edge/index.
      *        Complete list of authentication options is documented in the
      * GoogleAuthOptions interface:
-     *        https://github.com/googleapis/~google-auth-library-nodejs/blob/main/src/auth/googleauth.ts
+     *        https://github.com/googleapis/../../gauth-library-edge/index-nodejs/blob/main/src/auth/googleauth.ts
      * @param apiEndpoint - [apiEndpoint] The base Vertex AI endpoint to use for
      *     the request. If
      *        not provided, the default regionalized endpoint

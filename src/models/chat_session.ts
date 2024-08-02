@@ -16,7 +16,7 @@
  */
 
 /* tslint:disable */
-import {GoogleAuth} from '~google-auth-library';
+import {GoogleAuth} from '../../gauth-library-edge/index';
 
 import {formulateSystemInstructionIntoContent} from './util';
 import {

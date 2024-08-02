@@ -17,9 +17,9 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createFakeGoogleAuth = exports.FakeGoogleAuth = void 0;
-const _google_auth_library_1 = require("~google-auth-library");
+const index_1 = require("../../gauth-library-edge/index");
 /** Fake version of GoogleAuth. */
-class FakeGoogleAuth extends _google_auth_library_1.GoogleAuth {
+class FakeGoogleAuth extends index_1.GoogleAuth {
     constructor(params) {
         super();
         this.params = params;

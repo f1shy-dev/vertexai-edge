@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {GoogleAuth} from '~google-auth-library';
+import {GoogleAuth} from '../../gauth-library-edge/index';
 
 interface FakeGoogleAuthParams {
   scopes?: string;

@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-const _google_auth_library_1 = require("~google-auth-library");
+const index_1 = require("../../gauth-library-edge/index");
 const fake_google_auth_1 = require("./fake_google_auth");
 describe('Fake GoogleAuth', () => {
     it('can create fake GoogleAuth with GoogleAuth instance.', () => {
         const auth = (0, fake_google_auth_1.createFakeGoogleAuth)();
-        expect(auth).toBeInstanceOf(_google_auth_library_1.GoogleAuth);
+        expect(auth).toBeInstanceOf(index_1.GoogleAuth);
     });
     it('can setup and get fake token.', async () => {
         const accessToken = 'abc123';
