@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { GenerateContentRequest, GenerateContentResult, GenerationConfig, RequestOptions, SafetySetting, StreamGenerateContentResult, Tool } from '../types/content';
+import { ToolConfig } from '../types/tool';
 /**
  * Make a async call to generate content.
  * @param request A GenerateContentRequest object with the request contents.
  * @returns The GenerateContentResponse object with the response candidates.
  */
-import { GenerateContentRequest, GenerateContentResult, GenerationConfig, RequestOptions, SafetySetting, StreamGenerateContentResult, Tool } from '../types/content';
-export declare function generateContent(location: string, resourcePath: string, token: Promise<string | null | undefined>, request: GenerateContentRequest | string, apiEndpoint?: string, generationConfig?: GenerationConfig, safetySettings?: SafetySetting[], tools?: Tool[], requestOptions?: RequestOptions): Promise<GenerateContentResult>;
+export declare function generateContent(location: string, resourcePath: string, token: Promise<string | null | undefined>, request: GenerateContentRequest | string, apiEndpoint?: string, generationConfig?: GenerationConfig, safetySettings?: SafetySetting[], tools?: Tool[], toolConfig?: ToolConfig, requestOptions?: RequestOptions): Promise<GenerateContentResult>;
 /**
  * Make an async stream request to generate content. The response will be
  * returned in stream.
@@ -28,4 +29,4 @@ export declare function generateContent(location: string, resourcePath: string, 
  * @returns {Promise<StreamGenerateContentResult>} Promise of {@link
  *     StreamGenerateContentResult}
  */
-export declare function generateContentStream(location: string, resourcePath: string, token: Promise<string | null | undefined>, request: GenerateContentRequest | string, apiEndpoint?: string, generationConfig?: GenerationConfig, safetySettings?: SafetySetting[], tools?: Tool[], requestOptions?: RequestOptions): Promise<StreamGenerateContentResult>;
+export declare function generateContentStream(location: string, resourcePath: string, token: Promise<string | null | undefined>, request: GenerateContentRequest | string, apiEndpoint?: string, generationConfig?: GenerationConfig, safetySettings?: SafetySetting[], tools?: Tool[], toolConfig?: ToolConfig, requestOptions?: RequestOptions): Promise<StreamGenerateContentResult>;

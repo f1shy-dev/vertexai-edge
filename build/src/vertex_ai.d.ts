@@ -16,7 +16,8 @@
  */
 import { GoogleAuth } from '../gauth-library-edge/index';
 import { GenerativeModelPreview, GenerativeModel } from './models';
-import type { ModelParams, RequestOptions, VertexInit } from './types/content';
+import { CachedContent, ModelParams, RequestOptions, VertexInit } from './types/content';
+import * as Resources from './resources';
 /**
  * The `VertexAI` class is the base class for authenticating to Vertex AI.
  * To use Vertex AI's generative AI models, use the `getGenerativeModel` method.
@@ -96,6 +97,8 @@ declare class VertexAIPreview {
     private readonly location;
     private readonly googleAuth;
     private readonly apiEndpoint?;
+    private readonly apiClient;
+    readonly cachedContents: Resources.CachedContents;
     /**
      * @constructor
      * @param project - The Google Cloud project to use for the request
@@ -118,5 +121,6 @@ declare class VertexAIPreview {
      * @returns Instance of the GenerativeModelPreview class.
      */
     getGenerativeModel(modelParams: ModelParams, requestOptions?: RequestOptions): GenerativeModelPreview;
+    getGenerativeModelFromCachedContent(cachedContent: CachedContent, modelParams?: Partial<ModelParams>, requestOptions?: RequestOptions): GenerativeModelPreview;
 }
 export {};

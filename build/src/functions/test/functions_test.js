@@ -165,6 +165,7 @@ const TEST_MULTIPART_MESSAGE_BASE64 = [
     },
 ];
 const TEST_EMPTY_TOOLS = [];
+const TEST_EMPTY_TOOL_CONFIG = {};
 const TEST_TOOLS_WITH_FUNCTION_DECLARATION = [
     {
         functionDeclarations: [
@@ -256,13 +257,25 @@ describe('countTokens', () => {
             ok: false,
         };
         const body = {
-            code: 400,
-            message: 'request is invalid',
-            status: 'INVALID_ARGUMENT',
+            error: {
+                code: 400,
+                message: 'request is invalid',
+                status: 'INVALID_ARGUMENT',
+            },
         };
         const response = new Response(JSON.stringify(body), fetch400Obj);
         spyOn(global, 'fetch').and.resolveTo(response);
-        await expectAsync((0, count_tokens_1.countTokens)(TEST_LOCATION, TEST_RESOURCE_PATH, TEST_TOKEN_PROMISE, req, TEST_API_ENDPOINT)).toBeRejected();
+        let error;
+        try {
+            await (0, count_tokens_1.countTokens)(TEST_LOCATION, TEST_RESOURCE_PATH, TEST_TOKEN_PROMISE, req, TEST_API_ENDPOINT);
+        }
+        catch (e) {
+            error = e;
+        }
+        expect(error).toBeInstanceOf(types_1.ClientError);
+        expect(error.cause).toBeInstanceOf(types_1.GoogleApiError);
+        expect(error.cause.code).toBe(400);
+        expect(error.cause.status).toEqual('INVALID_ARGUMENT');
     });
 });
 describe('generateContent', () => {
@@ -279,7 +292,7 @@ describe('generateContent', () => {
             status: 500,
             statusText: 'AbortError',
         });
-        await expectAsync((0, generate_content_1.generateContent)(TEST_LOCATION, TEST_RESOURCE_PATH, TEST_TOKEN_PROMISE, req, TEST_API_ENDPOINT, TEST_GENERATION_CONFIG, TEST_SAFETY_SETTINGS, TEST_EMPTY_TOOLS, TEST_REQUEST_OPTIONS)).toBeRejected();
+        await expectAsync((0, generate_content_1.generateContent)(TEST_LOCATION, TEST_RESOURCE_PATH, TEST_TOKEN_PROMISE, req, TEST_API_ENDPOINT, TEST_GENERATION_CONFIG, TEST_SAFETY_SETTINGS, TEST_EMPTY_TOOLS, TEST_EMPTY_TOOL_CONFIG, TEST_REQUEST_OPTIONS)).toBeRejected();
         expect(fetchSpy.calls.allArgs()[0][1].signal).toBeInstanceOf(AbortSignal);
     });
     it('returns a GenerateContentResponse', async () => {
@@ -453,7 +466,7 @@ describe('generateContentStream', () => {
             status: 500,
             statusText: 'AbortError',
         });
-        await expectAsync((0, generate_content_1.generateContentStream)(TEST_LOCATION, TEST_RESOURCE_PATH, TEST_TOKEN_PROMISE, req, TEST_API_ENDPOINT, TEST_GENERATION_CONFIG, TEST_SAFETY_SETTINGS, TEST_EMPTY_TOOLS, TEST_REQUEST_OPTIONS)).toBeRejected();
+        await expectAsync((0, generate_content_1.generateContentStream)(TEST_LOCATION, TEST_RESOURCE_PATH, TEST_TOKEN_PROMISE, req, TEST_API_ENDPOINT, TEST_GENERATION_CONFIG, TEST_SAFETY_SETTINGS, TEST_EMPTY_TOOLS, TEST_EMPTY_TOOL_CONFIG, TEST_REQUEST_OPTIONS)).toBeRejected();
         expect(fetchSpy.calls.allArgs()[0][1].signal).toBeInstanceOf(AbortSignal);
     });
     it('returns a GenerateContentResponse when passed text content', async () => {

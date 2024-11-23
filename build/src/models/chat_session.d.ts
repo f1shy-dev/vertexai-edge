@@ -34,6 +34,7 @@ export declare class ChatSession {
     private readonly generationConfig?;
     private readonly safetySettings?;
     private readonly tools?;
+    private readonly toolConfig?;
     private readonly apiEndpoint?;
     private readonly systemInstruction?;
     getHistory(): Promise<Content[]>;
@@ -113,8 +114,10 @@ export declare class ChatSessionPreview {
     private readonly generationConfig?;
     private readonly safetySettings?;
     private readonly tools?;
+    private readonly toolConfig?;
     private readonly apiEndpoint?;
     private readonly systemInstruction?;
+    private readonly cachedContent?;
     getHistory(): Promise<Content[]>;
     /**
      * @constructor

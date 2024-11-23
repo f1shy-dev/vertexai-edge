@@ -22,8 +22,13 @@ const constants = require("../util/constants");
 const post_fetch_processing_1 = require("./post_fetch_processing");
 const post_request_1 = require("./post_request");
 const pre_fetch_processing_1 = require("./pre_fetch_processing");
-async function generateContent(location, resourcePath, token, request, apiEndpoint, generationConfig, safetySettings, tools, requestOptions) {
-    var _a, _b, _c;
+/**
+ * Make a async call to generate content.
+ * @param request A GenerateContentRequest object with the request contents.
+ * @returns The GenerateContentResponse object with the response candidates.
+ */
+async function generateContent(location, resourcePath, token, request, apiEndpoint, generationConfig, safetySettings, tools, toolConfig, requestOptions) {
+    var _a, _b, _c, _d;
     request = (0, pre_fetch_processing_1.formatContentRequest)(request, generationConfig, safetySettings);
     (0, pre_fetch_processing_1.validateGenerateContentRequest)(request);
     if (request.generationConfig) {
@@ -32,9 +37,11 @@ async function generateContent(location, resourcePath, token, request, apiEndpoi
     const generateContentRequest = {
         contents: request.contents,
         systemInstruction: request.systemInstruction,
+        cachedContent: request.cachedContent,
         generationConfig: (_a = request.generationConfig) !== null && _a !== void 0 ? _a : generationConfig,
         safetySettings: (_b = request.safetySettings) !== null && _b !== void 0 ? _b : safetySettings,
         tools: (_c = request.tools) !== null && _c !== void 0 ? _c : tools,
+        toolConfig: (_d = request.toolConfig) !== null && _d !== void 0 ? _d : toolConfig,
     };
     const response = await (0, post_request_1.postRequest)({
         region: location,
@@ -61,8 +68,8 @@ exports.generateContent = generateContent;
  * @returns {Promise<StreamGenerateContentResult>} Promise of {@link
  *     StreamGenerateContentResult}
  */
-async function generateContentStream(location, resourcePath, token, request, apiEndpoint, generationConfig, safetySettings, tools, requestOptions) {
-    var _a, _b, _c;
+async function generateContentStream(location, resourcePath, token, request, apiEndpoint, generationConfig, safetySettings, tools, toolConfig, requestOptions) {
+    var _a, _b, _c, _d;
     request = (0, pre_fetch_processing_1.formatContentRequest)(request, generationConfig, safetySettings);
     (0, pre_fetch_processing_1.validateGenerateContentRequest)(request);
     if (request.generationConfig) {
@@ -71,9 +78,11 @@ async function generateContentStream(location, resourcePath, token, request, api
     const generateContentRequest = {
         contents: request.contents,
         systemInstruction: request.systemInstruction,
+        cachedContent: request.cachedContent,
         generationConfig: (_a = request.generationConfig) !== null && _a !== void 0 ? _a : generationConfig,
         safetySettings: (_b = request.safetySettings) !== null && _b !== void 0 ? _b : safetySettings,
         tools: (_c = request.tools) !== null && _c !== void 0 ? _c : tools,
+        toolConfig: (_d = request.toolConfig) !== null && _d !== void 0 ? _d : toolConfig,
     };
     const response = await (0, post_request_1.postRequest)({
         region: location,

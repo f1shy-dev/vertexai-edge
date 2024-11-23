@@ -60,7 +60,9 @@ function validateGenerationConfig(generationConfig) {
 }
 exports.validateGenerationConfig = validateGenerationConfig;
 function getApiVersion(request) {
-    return hasVertexRagStore(request) ? 'v1beta1' : 'v1';
+    return hasVertexRagStore(request) || hasCachedContent(request)
+        ? 'v1beta1'
+        : 'v1';
 }
 exports.getApiVersion = getApiVersion;
 function hasVertexRagStore(request) {
@@ -76,6 +78,9 @@ function hasVertexRagStore(request) {
     return false;
 }
 exports.hasVertexRagStore = hasVertexRagStore;
+function hasCachedContent(request) {
+    return !!request.cachedContent;
+}
 function hasVertexAISearch(request) {
     var _a;
     for (const tool of (_a = request === null || request === void 0 ? void 0 : request.tools) !== null && _a !== void 0 ? _a : []) {

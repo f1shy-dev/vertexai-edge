@@ -17,7 +17,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatSessionPreview = exports.ChatSession = void 0;
-const util_1 = require("./util");
+const util_1 = require("../functions/util");
 const generate_content_1 = require("../functions/generate_content");
 const errors_1 = require("../types/errors");
 const util_2 = require("../util");
@@ -48,6 +48,7 @@ class ChatSession {
         this.generationConfig = request.generationConfig;
         this.safetySettings = request.safetySettings;
         this.tools = request.tools;
+        this.toolConfig = request.toolConfig;
         this.apiEndpoint = request.apiEndpoint;
         this.requestOptions = requestOptions !== null && requestOptions !== void 0 ? requestOptions : {};
         if (request.systemInstruction) {
@@ -91,9 +92,10 @@ class ChatSession {
             safetySettings: this.safetySettings,
             generationConfig: this.generationConfig,
             tools: this.tools,
+            toolConfig: this.toolConfig,
             systemInstruction: this.systemInstruction,
         };
-        const generateContentResult = await (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), generateContentrequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions).catch(e => {
+        const generateContentResult = await (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), generateContentrequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions).catch(e => {
             throw e;
         });
         const generateContentResponse = await generateContentResult.response;
@@ -147,9 +149,10 @@ class ChatSession {
             safetySettings: this.safetySettings,
             generationConfig: this.generationConfig,
             tools: this.tools,
+            toolConfig: this.toolConfig,
             systemInstruction: this.systemInstruction,
         };
-        const streamGenerateContentResultPromise = (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), generateContentrequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions).catch(e => {
+        const streamGenerateContentResultPromise = (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), generateContentrequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions).catch(e => {
             throw e;
         });
         this.sendStreamPromise = this.appendHistory(streamGenerateContentResultPromise, newContent).catch(e => {
@@ -188,8 +191,10 @@ class ChatSessionPreview {
         this.generationConfig = request.generationConfig;
         this.safetySettings = request.safetySettings;
         this.tools = request.tools;
+        this.toolConfig = request.toolConfig;
         this.apiEndpoint = request.apiEndpoint;
         this.requestOptions = requestOptions !== null && requestOptions !== void 0 ? requestOptions : {};
+        this.cachedContent = request.cachedContent;
         if (request.systemInstruction) {
             this.systemInstruction = (0, util_1.formulateSystemInstructionIntoContent)(request.systemInstruction);
         }
@@ -230,9 +235,10 @@ class ChatSessionPreview {
             safetySettings: this.safetySettings,
             generationConfig: this.generationConfig,
             tools: this.tools,
+            toolConfig: this.toolConfig,
             systemInstruction: this.systemInstruction,
         };
-        const generateContentResult = await (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), generateContentrequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions).catch(e => {
+        const generateContentResult = await (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), generateContentrequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions).catch(e => {
             throw e;
         });
         const generateContentResponse = await generateContentResult.response;
@@ -281,14 +287,16 @@ class ChatSessionPreview {
      */
     async sendMessageStream(request) {
         const newContent = formulateNewContentFromSendMessageRequest(request);
-        const generateContentrequest = {
+        const generateContentRequest = {
             contents: this.historyInternal.concat(newContent),
             safetySettings: this.safetySettings,
             generationConfig: this.generationConfig,
             tools: this.tools,
+            toolConfig: this.toolConfig,
             systemInstruction: this.systemInstruction,
+            cachedContent: this.cachedContent,
         };
-        const streamGenerateContentResultPromise = (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), generateContentrequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions).catch(e => {
+        const streamGenerateContentResultPromise = (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), generateContentRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions).catch(e => {
             throw e;
         });
         this.sendStreamPromise = this.appendHistory(streamGenerateContentResultPromise, newContent).catch(e => {

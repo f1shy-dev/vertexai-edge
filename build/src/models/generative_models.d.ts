@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CountTokensRequest, CountTokensResponse, GenerateContentRequest, GenerateContentResult, GetGenerativeModelParams, StartChatParams, StreamGenerateContentResult } from '../types/content';
+import { CachedContent, Content, CountTokensRequest, CountTokensResponse, GenerateContentRequest, GenerateContentResult, GetGenerativeModelParams, StartChatParams, StreamGenerateContentResult } from '../types/content';
 import { ChatSession, ChatSessionPreview } from './chat_session';
 /**
  * The `GenerativeModel` class is the base class for the generative models on
@@ -27,6 +27,7 @@ export declare class GenerativeModel {
     private readonly generationConfig?;
     private readonly safetySettings?;
     private readonly tools?;
+    private readonly toolConfig?;
     private readonly requestOptions?;
     private readonly systemInstruction?;
     private readonly project;
@@ -146,6 +147,7 @@ export declare class GenerativeModelPreview {
     private readonly generationConfig?;
     private readonly safetySettings?;
     private readonly tools?;
+    private readonly toolConfig?;
     private readonly requestOptions?;
     private readonly systemInstruction?;
     private readonly project;
@@ -154,6 +156,7 @@ export declare class GenerativeModelPreview {
     private readonly publisherModelEndpoint;
     private readonly resourcePath;
     private readonly apiEndpoint?;
+    private readonly cachedContent?;
     /**
      * @constructor
      * @param getGenerativeModelParams - {@link GetGenerativeModelParams}
@@ -252,4 +255,7 @@ export declare class GenerativeModelPreview {
      * @returns {@link ChatSessionPreview}
      */
     startChat(request?: StartChatParams): ChatSessionPreview;
+    getModelName(): string;
+    getCachedContent(): CachedContent | undefined;
+    getSystemInstruction(): Content | undefined;
 }

@@ -20,5 +20,5 @@ export declare const COUNT_TOKENS_METHOD = "countTokens";
 export declare const USER_ROLE = "user";
 export declare const MODEL_ROLE = "model";
 export declare const SYSTEM_ROLE = "system";
-export declare const USER_AGENT = "model-builder/1.4.0 grpc-node/1.4.0";
+export declare const USER_AGENT = "model-builder/1.9.0 grpc-node/1.9.0";
 export declare const CREDENTIAL_ERROR_MESSAGE = "\nUnable to authenticate your request        \nDepending on your run time environment, you can get authentication by        \n- if in local instance or cloud shell: `!gcloud auth login`        \n- if in Colab:        \n    -`from google.colab import auth`        \n    -`auth.authenticate_user()`        \n- if in service account or other: please follow guidance in https://cloud.google.com/docs/authentication";

@@ -17,7 +17,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GenerativeModelPreview = exports.GenerativeModel = void 0;
-const util_1 = require("./util");
+const util_1 = require("../functions/util");
 const count_tokens_1 = require("../functions/count_tokens");
 const generate_content_1 = require("../functions/generate_content");
 const errors_1 = require("../types/errors");
@@ -44,6 +44,7 @@ class GenerativeModel {
         this.generationConfig = getGenerativeModelParams.generationConfig;
         this.safetySettings = getGenerativeModelParams.safetySettings;
         this.tools = getGenerativeModelParams.tools;
+        this.toolConfig = getGenerativeModelParams.toolConfig;
         this.requestOptions = (_a = getGenerativeModelParams.requestOptions) !== null && _a !== void 0 ? _a : {};
         if (getGenerativeModelParams.systemInstruction) {
             this.systemInstruction = (0, util_1.formulateSystemInstructionIntoContent)(getGenerativeModelParams.systemInstruction);
@@ -84,7 +85,7 @@ class GenerativeModel {
     async generateContent(request) {
         request = formulateRequestToGenerateContentRequest(request);
         const formulatedRequest = formulateSystemInstructionIntoGenerateContentRequest(request, this.systemInstruction);
-        return (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions);
+        return (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions);
     }
     /**
      * Makes an async stream request to generate content.
@@ -113,7 +114,7 @@ class GenerativeModel {
     async generateContentStream(request) {
         request = formulateRequestToGenerateContentRequest(request);
         const formulatedRequest = formulateSystemInstructionIntoGenerateContentRequest(request, this.systemInstruction);
-        return (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions);
+        return (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions);
     }
     /**
      * Makes an async request to count tokens.
@@ -169,6 +170,7 @@ class GenerativeModel {
             publisherModelEndpoint: this.publisherModelEndpoint,
             resourcePath: this.resourcePath,
             tools: this.tools,
+            toolConfig: this.toolConfig,
             systemInstruction: this.systemInstruction,
         };
         if (request) {
@@ -207,6 +209,8 @@ class GenerativeModelPreview {
         this.generationConfig = getGenerativeModelParams.generationConfig;
         this.safetySettings = getGenerativeModelParams.safetySettings;
         this.tools = getGenerativeModelParams.tools;
+        this.toolConfig = getGenerativeModelParams.toolConfig;
+        this.cachedContent = getGenerativeModelParams.cachedContent;
         this.requestOptions = (_a = getGenerativeModelParams.requestOptions) !== null && _a !== void 0 ? _a : {};
         if (getGenerativeModelParams.systemInstruction) {
             this.systemInstruction = (0, util_1.formulateSystemInstructionIntoContent)(getGenerativeModelParams.systemInstruction);
@@ -244,9 +248,13 @@ class GenerativeModelPreview {
      * @returns The GenerateContentResponse object with the response candidates.
      */
     async generateContent(request) {
+        var _a;
         request = formulateRequestToGenerateContentRequest(request);
-        const formulatedRequest = formulateSystemInstructionIntoGenerateContentRequest(request, this.systemInstruction);
-        return (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions);
+        const formulatedRequest = {
+            ...formulateSystemInstructionIntoGenerateContentRequest(request, this.systemInstruction),
+            cachedContent: (_a = this.cachedContent) === null || _a === void 0 ? void 0 : _a.name,
+        };
+        return (0, generate_content_1.generateContent)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions);
     }
     /**
      * Makes an async stream request to generate content.
@@ -273,9 +281,13 @@ class GenerativeModelPreview {
      * @returns Promise of {@link StreamGenerateContentResult}
      */
     async generateContentStream(request) {
+        var _a;
         request = formulateRequestToGenerateContentRequest(request);
-        const formulatedRequest = formulateSystemInstructionIntoGenerateContentRequest(request, this.systemInstruction);
-        return (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.requestOptions);
+        const formulatedRequest = {
+            ...formulateSystemInstructionIntoGenerateContentRequest(request, this.systemInstruction),
+            cachedContent: (_a = this.cachedContent) === null || _a === void 0 ? void 0 : _a.name,
+        };
+        return (0, generate_content_1.generateContentStream)(this.location, this.resourcePath, this.fetchToken(), formulatedRequest, this.apiEndpoint, this.generationConfig, this.safetySettings, this.tools, this.toolConfig, this.requestOptions);
     }
     /**
      * Makes an async request to count tokens.
@@ -323,7 +335,7 @@ class GenerativeModelPreview {
      * @returns {@link ChatSessionPreview}
      */
     startChat(request) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g;
         const startChatRequest = {
             project: this.project,
             location: this.location,
@@ -332,18 +344,30 @@ class GenerativeModelPreview {
             resourcePath: this.resourcePath,
             tools: this.tools,
             systemInstruction: this.systemInstruction,
+            cachedContent: (_a = this.cachedContent) === null || _a === void 0 ? void 0 : _a.name,
         };
         if (request) {
             startChatRequest.history = request.history;
             startChatRequest.generationConfig =
-                (_a = request.generationConfig) !== null && _a !== void 0 ? _a : this.generationConfig;
+                (_b = request.generationConfig) !== null && _b !== void 0 ? _b : this.generationConfig;
             startChatRequest.safetySettings =
-                (_b = request.safetySettings) !== null && _b !== void 0 ? _b : this.safetySettings;
-            startChatRequest.tools = (_c = request.tools) !== null && _c !== void 0 ? _c : this.tools;
+                (_c = request.safetySettings) !== null && _c !== void 0 ? _c : this.safetySettings;
+            startChatRequest.tools = (_d = request.tools) !== null && _d !== void 0 ? _d : this.tools;
             startChatRequest.systemInstruction =
-                (_d = request.systemInstruction) !== null && _d !== void 0 ? _d : this.systemInstruction;
+                (_e = request.systemInstruction) !== null && _e !== void 0 ? _e : this.systemInstruction;
+            startChatRequest.cachedContent =
+                (_f = request.cachedContent) !== null && _f !== void 0 ? _f : (_g = this.cachedContent) === null || _g === void 0 ? void 0 : _g.name;
         }
         return new chat_session_1.ChatSessionPreview(startChatRequest, this.requestOptions);
+    }
+    getModelName() {
+        return this.model;
+    }
+    getCachedContent() {
+        return this.cachedContent;
+    }
+    getSystemInstruction() {
+        return this.systemInstruction;
     }
 }
 exports.GenerativeModelPreview = GenerativeModelPreview;

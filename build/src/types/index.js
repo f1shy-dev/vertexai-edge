@@ -33,6 +33,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GenerateContentResponseHandler = void 0;
 __exportStar(require("./content"), exports);
 __exportStar(require("./errors"), exports);
+__exportStar(require("./tool"), exports);
+__exportStar(require("./common"), exports);
 var generate_content_response_handler_1 = require("./generate_content_response_handler");
 Object.defineProperty(exports, "GenerateContentResponseHandler", { enumerable: true, get: function () { return generate_content_response_handler_1.GenerateContentResponseHandler; } });
 //# sourceMappingURL=index.js.map

@@ -21,6 +21,8 @@ exports.VertexAI = void 0;
 const index_1 = require("../gauth-library-edge/index");
 const models_1 = require("./models");
 const errors_1 = require("./types/errors");
+const Resources = require("./resources");
+const cached_contents_1 = require("./resources/cached_contents");
 /**
  * The `VertexAI` class is the base class for authenticating to Vertex AI.
  * To use Vertex AI's generative AI models, use the `getGenerativeModel` method.
@@ -99,6 +101,7 @@ class VertexAI {
             safetySettings: modelParams.safetySettings,
             generationConfig: modelParams.generationConfig,
             tools: modelParams.tools,
+            toolConfig: modelParams.toolConfig,
             requestOptions: requestOptions,
             systemInstruction: modelParams.systemInstruction,
         };
@@ -137,6 +140,8 @@ class VertexAIPreview {
         this.location = location;
         this.googleAuth = googleAuth;
         this.apiEndpoint = apiEndpoint;
+        this.apiClient = new Resources.ApiClient(this.project, this.location, 'v1beta1', this.googleAuth);
+        this.cachedContents = new Resources.CachedContents(this.apiClient);
     }
     /**
      * @param modelParams - {@link ModelParams} Parameters to
@@ -153,11 +158,72 @@ class VertexAIPreview {
             safetySettings: modelParams.safetySettings,
             generationConfig: modelParams.generationConfig,
             tools: modelParams.tools,
+            toolConfig: modelParams.toolConfig,
             requestOptions: requestOptions,
             systemInstruction: modelParams.systemInstruction,
         };
         return new models_1.GenerativeModelPreview(getGenerativeModelParams);
     }
+    getGenerativeModelFromCachedContent(cachedContent, modelParams, requestOptions) {
+        if (!cachedContent.name) {
+            throw new errors_1.ClientError('Cached content must contain a `name` field.');
+        }
+        if (!cachedContent.model) {
+            throw new errors_1.ClientError('Cached content must contain a `model` field.');
+        }
+        validateCachedContentModel(cachedContent.model);
+        /**
+         * Not checking tools and toolConfig for now as it would require a deep
+         * equality comparison and isn't likely to be a common case.
+         */
+        const disallowedDuplicates = ['model', 'systemInstruction'];
+        for (const key of disallowedDuplicates) {
+            if ((modelParams === null || modelParams === void 0 ? void 0 : modelParams[key]) &&
+                cachedContent[key] &&
+                (modelParams === null || modelParams === void 0 ? void 0 : modelParams[key]) !== cachedContent[key]) {
+                if (key === 'model') {
+                    const modelParamsComp = parseModelName(modelParams[key]);
+                    const cachedContentComp = parseModelName(cachedContent[key]);
+                    if (modelParamsComp === cachedContentComp) {
+                        continue;
+                    }
+                }
+                throw new errors_1.ClientError(`Different value for "${key}" specified in modelParams` +
+                    ` (${modelParams[key]}) and cachedContent (${cachedContent[key]})`);
+            }
+        }
+        cachedContent.name = (0, cached_contents_1.inferFullResourceName)(this.project, this.location, cachedContent.name);
+        const modelParamsFromCache = {
+            model: cachedContent.model,
+            project: this.project,
+            location: this.location,
+            googleAuth: this.googleAuth,
+            apiEndpoint: this.apiEndpoint,
+            safetySettings: modelParams === null || modelParams === void 0 ? void 0 : modelParams.safetySettings,
+            generationConfig: modelParams === null || modelParams === void 0 ? void 0 : modelParams.generationConfig,
+            tools: cachedContent.tools,
+            toolConfig: cachedContent.toolConfig,
+            requestOptions: requestOptions,
+            systemInstruction: cachedContent.systemInstruction,
+            cachedContent,
+        };
+        return new models_1.GenerativeModelPreview(modelParamsFromCache);
+    }
+}
+function validateCachedContentModel(modelName) {
+    if (modelName.startsWith('models/') ||
+        (modelName.startsWith('projects/') &&
+            modelName.includes('/publishers/google/models/')) ||
+        !modelName.includes('/')) {
+        return;
+    }
+    throw new errors_1.ClientError(`Cached content model name must start with "models/" or match "projects/.*/publishers/google/models/.*" or is a model name listed at https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions. Received: ${modelName}`);
+}
+function parseModelName(modelName) {
+    if (!modelName.includes('/')) {
+        return modelName;
+    }
+    return modelName.split('/').pop();
 }
 function validateGoogleAuthOptions(project, googleAuthOptions) {
     let opts;

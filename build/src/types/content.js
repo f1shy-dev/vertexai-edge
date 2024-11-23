@@ -17,6 +17,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FunctionDeclarationSchemaType = exports.FinishReason = exports.BlockedReason = exports.HarmSeverity = exports.HarmProbability = exports.HarmBlockThreshold = exports.HarmCategory = void 0;
+const common_1 = require("./common");
 /**
  * Harm categories that will block the content.
  */
@@ -136,23 +137,5 @@ var FinishReason;
      */
     FinishReason["SPII"] = "SPII";
 })(FinishReason || (exports.FinishReason = FinishReason = {}));
-/**
- * Contains the list of OpenAPI data types
- * as defined by https://swagger.io/docs/specification/data-models/data-types/
- */
-var FunctionDeclarationSchemaType;
-(function (FunctionDeclarationSchemaType) {
-    /** String type. */
-    FunctionDeclarationSchemaType["STRING"] = "STRING";
-    /** Number type. */
-    FunctionDeclarationSchemaType["NUMBER"] = "NUMBER";
-    /** Integer type. */
-    FunctionDeclarationSchemaType["INTEGER"] = "INTEGER";
-    /** Boolean type. */
-    FunctionDeclarationSchemaType["BOOLEAN"] = "BOOLEAN";
-    /** Array type. */
-    FunctionDeclarationSchemaType["ARRAY"] = "ARRAY";
-    /** Object type. */
-    FunctionDeclarationSchemaType["OBJECT"] = "OBJECT";
-})(FunctionDeclarationSchemaType || (exports.FunctionDeclarationSchemaType = FunctionDeclarationSchemaType = {}));
+exports.FunctionDeclarationSchemaType = { ...common_1.SchemaType };
 //# sourceMappingURL=content.js.map

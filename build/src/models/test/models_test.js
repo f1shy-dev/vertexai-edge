@@ -19,7 +19,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("../../util");
 const generative_models_1 = require("../generative_models");
 const chat_session_1 = require("../chat_session");
-const content_1 = require("../../types/content");
+const types_1 = require("../../types");
 const PostFetchFunctions = require("../../functions/post_fetch_processing");
 const GenerateContentFunctions = require("../../functions/generate_content");
 const CountTokensFunctions = require("../../functions/count_tokens");
@@ -37,8 +37,8 @@ const TEST_USER_CHAT_MESSAGE = [
 ];
 const TEST_SAFETY_RATINGS = [
     {
-        category: content_1.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        probability: content_1.HarmProbability.NEGLIGIBLE,
+        category: types_1.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        probability: types_1.HarmProbability.NEGLIGIBLE,
     },
 ];
 const TEST_CANDIDATES = [
@@ -48,7 +48,7 @@ const TEST_CANDIDATES = [
             role: util_1.constants.MODEL_ROLE,
             parts: [{ text: 'Im doing great! How are you?' }],
         },
-        finishReason: content_1.FinishReason.STOP,
+        finishReason: types_1.FinishReason.STOP,
         finishMessage: '',
         safetyRatings: TEST_SAFETY_RATINGS,
         citationMetadata: {
@@ -100,8 +100,8 @@ const TEST_USER_CHAT_MESSAGE_WITH_INVALID_GCS_FILE = [
 ];
 const TEST_SAFETY_SETTINGS = [
     {
-        category: content_1.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: content_1.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        category: types_1.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: types_1.HarmBlockThreshold.BLOCK_ONLY_HIGH,
     },
 ];
 const TEST_GENERATION_CONFIG = {
@@ -125,7 +125,7 @@ const TEST_CANDIDATES_WITH_FUNCTION_CALL = [
             role: util_1.constants.MODEL_ROLE,
             parts: [TEST_FUNCTION_CALL_RESPONSE],
         },
-        finishReason: content_1.FinishReason.STOP,
+        finishReason: types_1.FinishReason.STOP,
         finishMessage: '',
         safetyRatings: TEST_SAFETY_RATINGS,
     },
@@ -148,11 +148,11 @@ const TEST_TOOLS_WITH_FUNCTION_DECLARATION = [
                 name: 'get_current_weather',
                 description: 'get weather in a given location',
                 parameters: {
-                    type: content_1.FunctionDeclarationSchemaType.OBJECT,
+                    type: types_1.FunctionDeclarationSchemaType.OBJECT,
                     properties: {
-                        location: { type: content_1.FunctionDeclarationSchemaType.STRING },
+                        location: { type: types_1.FunctionDeclarationSchemaType.STRING },
                         unit: {
-                            type: content_1.FunctionDeclarationSchemaType.STRING,
+                            type: types_1.FunctionDeclarationSchemaType.STRING,
                             enum: ['celsius', 'fahrenheit'],
                         },
                     },
@@ -253,6 +253,23 @@ describe('GenerativeModel startChat', () => {
         });
         const chat = model.startChat({
             history: TEST_USER_CHAT_MESSAGE,
+        });
+        expect(chat).toBeInstanceOf(chat_session_1.ChatSession);
+    });
+    it('returns ChatSession when pass an arg with generationConfig including responseMimeType', async () => {
+        const fetchResult = Promise.resolve(new Response(JSON.stringify(TEST_MODEL_RESPONSE), fetchResponseObj));
+        const fetchSpy = spyOn(global, 'fetch').and.returnValue(fetchResult);
+        const model = new generative_models_1.GenerativeModel({
+            model: 'gemini-pro',
+            project: PROJECT,
+            location: LOCATION,
+            googleAuth: FAKE_GOOGLE_AUTH,
+        });
+        const chat = model.startChat({
+            generationConfig: {
+                ...TEST_GENERATION_CONFIG,
+                responseMimeType: 'application/json',
+            },
         });
         expect(chat).toBeInstanceOf(chat_session_1.ChatSession);
     });
@@ -421,6 +438,21 @@ describe('GenerativeModelPreview startChat', () => {
         });
         const chat = model.startChat({
             history: TEST_USER_CHAT_MESSAGE,
+        });
+        expect(chat).toBeInstanceOf(chat_session_1.ChatSessionPreview);
+    });
+    it('returns ChatSessionPreview when pass an arg with generationConfig including responseMimeType', async () => {
+        const model = new generative_models_1.GenerativeModelPreview({
+            model: 'gemini-pro',
+            project: PROJECT,
+            location: LOCATION,
+            googleAuth: FAKE_GOOGLE_AUTH,
+        });
+        const chat = model.startChat({
+            generationConfig: {
+                ...TEST_GENERATION_CONFIG,
+                responseMimeType: 'application/json',
+            },
         });
         expect(chat).toBeInstanceOf(chat_session_1.ChatSessionPreview);
     });
@@ -686,7 +718,7 @@ describe('GenerativeModel generateContent', () => {
         const generateContentSpy = spyOn(GenerateContentFunctions, 'generateContent');
         await modelWithRequestOptions.generateContent(req);
         // @ts-ignore
-        expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+        expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
     });
     it('set system instruction in constructor, should send system instruction to functions', async () => {
         const modelWithSystemInstruction = new generative_models_1.GenerativeModel({
@@ -911,6 +943,17 @@ describe('GenerativeModel generateContent', () => {
         if (typeof requestArgs === 'object' && requestArgs) {
             expect(JSON.stringify(requestArgs['body'])).toContain('topK');
         }
+    });
+    it('includes responseMimeType', async () => {
+        const reqWithEmptyConfigs = {
+            contents: TEST_USER_CHAT_MESSAGE_WITH_GCS_FILE,
+            generationConfig: { responseMimeType: 'application/json' },
+            safetySettings: [],
+        };
+        const expectedRequestArgBody = '{"contents":[{"role":"user","parts":[{"text":"How are you doing today?"},{"fileData":{"fileUri":"gs://test_bucket/test_image.jpeg","mimeType":"image/jpeg"}}]}],"generationConfig":{"responseMimeType":"application/json"},"safetySettings":[]}';
+        await model.generateContent(reqWithEmptyConfigs);
+        const actualRequestArgsBody = fetchSpy.calls.allArgs()[0][1].body;
+        expect(actualRequestArgsBody).toEqual(expectedRequestArgBody);
     });
     it('aggregates citation metadata', async () => {
         var _a;
@@ -1086,7 +1129,7 @@ describe('GenerativeModelPreview generateContent', () => {
         const generateContentSpy = spyOn(GenerateContentFunctions, 'generateContent');
         await modelWithRequestOptions.generateContent(req);
         // @ts-ignore
-        expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+        expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
     });
     it('set system instruction in constructor, should send system instruction to functions', async () => {
         const modelWithSystemInstruction = new generative_models_1.GenerativeModelPreview({
@@ -1119,6 +1162,7 @@ describe('GenerativeModelPreview generateContent', () => {
                     },
                 ],
             },
+            cachedContent: undefined,
         };
         await modelWithSystemInstruction.generateContent(req);
         // @ts-ignore
@@ -1155,6 +1199,7 @@ describe('GenerativeModelPreview generateContent', () => {
                     },
                 ],
             },
+            cachedContent: undefined,
         };
         await modelWithSystemInstruction.generateContent(req);
         // @ts-ignore
@@ -1191,6 +1236,7 @@ describe('GenerativeModelPreview generateContent', () => {
                     },
                 ],
             },
+            cachedContent: undefined,
         };
         await modelWithSystemInstruction.generateContent(req);
         // @ts-ignore
@@ -1227,6 +1273,7 @@ describe('GenerativeModelPreview generateContent', () => {
                     },
                 ],
             },
+            cachedContent: undefined,
         };
         await modelWithSystemInstruction.generateContent(req);
         // @ts-ignore
@@ -1312,6 +1359,17 @@ describe('GenerativeModelPreview generateContent', () => {
             expect(JSON.stringify(requestArgs['body'])).toContain('topK');
         }
     });
+    it('includes responseMimeType', async () => {
+        const reqWithEmptyConfigs = {
+            contents: TEST_USER_CHAT_MESSAGE_WITH_GCS_FILE,
+            generationConfig: { responseMimeType: 'application/json' },
+            safetySettings: [],
+        };
+        const expectedRequestArgsBody = '{"contents":[{"role":"user","parts":[{"text":"How are you doing today?"},{"fileData":{"fileUri":"gs://test_bucket/test_image.jpeg","mimeType":"image/jpeg"}}]}],"generationConfig":{"responseMimeType":"application/json"},"safetySettings":[]}';
+        await model.generateContent(reqWithEmptyConfigs);
+        const actualRequestArgsBody = fetchSpy.calls.allArgs()[0][1].body;
+        expect(actualRequestArgsBody).toEqual(expectedRequestArgsBody);
+    });
     it('aggregates citation metadata', async () => {
         var _a;
         const req = {
@@ -1344,7 +1402,6 @@ describe('GenerativeModelPreview generateContent', () => {
         });
         const expectedBody = '{"contents":[{"role":"user","parts":[{"text":"How are you doing today?"}]}],"tools":[{"functionDeclarations":[{"name":"get_current_weather","description":"get weather in a given location","parameters":{"type":"OBJECT","properties":{"location":{"type":"STRING"},"unit":{"type":"STRING","enum":["celsius","fahrenheit"]}},"required":["location"]}}]}]}';
         await model.generateContent(TEST_CHAT_MESSSAGE_TEXT);
-        // @ts-ignore
         const actualBody = fetchSpy.calls.allArgs()[0][1].body;
         expect(actualBody).toEqual(expectedBody);
     });
@@ -1465,7 +1522,7 @@ describe('GenerativeModel generateContentStream', () => {
         const generateContentSpy = spyOn(GenerateContentFunctions, 'generateContentStream');
         await modelWithRequestOptions.generateContentStream(req);
         // @ts-ignore
-        expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+        expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
     });
     it('set system instruction in generateContent, should send system instruction to functions', async () => {
         const modelWithSystemInstruction = new generative_models_1.GenerativeModel({
@@ -1738,7 +1795,7 @@ describe('GenerativeModelPreview generateContentStream', () => {
         const generateContentSpy = spyOn(GenerateContentFunctions, 'generateContentStream');
         await modelWithRequestOptions.generateContentStream(req);
         // @ts-ignore
-        expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+        expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
     });
     it('set system instruction in generateContent, should send system instruction to functions', async () => {
         const modelWithSystemInstruction = new generative_models_1.GenerativeModelPreview({
@@ -1771,6 +1828,7 @@ describe('GenerativeModelPreview generateContentStream', () => {
                     },
                 ],
             },
+            cachedContent: undefined,
         };
         await modelWithSystemInstruction.generateContentStream(req);
         // @ts-ignore
@@ -1807,6 +1865,7 @@ describe('GenerativeModelPreview generateContentStream', () => {
                     },
                 ],
             },
+            cachedContent: undefined,
         };
         await modelWithSystemInstruction.generateContentStream(req);
         // @ts-ignore
@@ -1927,10 +1986,11 @@ describe('ChatSession', () => {
         });
     });
     describe('sendMessage', () => {
+        let fetchSpy;
         const expectedResponse = TEST_MODEL_RESPONSE;
         const fetchResult = Promise.resolve(new Response(JSON.stringify(expectedResponse), fetchResponseObj));
         beforeEach(() => {
-            spyOn(global, 'fetch').and.returnValue(fetchResult);
+            fetchSpy = spyOn(global, 'fetch').and.returnValue(fetchResult);
         });
         it('returns a GenerateContentResponse and appends to history', async () => {
             const req = 'How are you doing today?';
@@ -1998,6 +2058,29 @@ describe('ChatSession', () => {
             // @ts-ignore
             expect(generateContentSpy.calls.allArgs()[0][1]).toEqual(expectedResourcePath);
         });
+        it('send a message body with the responseMimeType property to functions', async () => {
+            const expectedResult = {
+                response: TEST_MODEL_RESPONSE,
+            };
+            const model = new generative_models_1.GenerativeModel({
+                model: 'gemini-pro',
+                project: PROJECT,
+                location: LOCATION,
+                googleAuth: FAKE_GOOGLE_AUTH,
+            });
+            const chat = model.startChat({
+                generationConfig: {
+                    ...TEST_GENERATION_CONFIG,
+                    responseMimeType: 'application/json',
+                },
+            });
+            const req = 'How are you doing today?';
+            const expectedBody = '{"contents":[{"role":"user","parts":[{"text":"How are you doing today?"}]}],"generationConfig":{"candidateCount":1,"stopSequences":["hello"],"responseMimeType":"application/json"}}';
+            spyOn(PostFetchFunctions, 'processUnary').and.resolveTo(expectedResult);
+            await chat.sendMessage(req);
+            const actualBody = fetchSpy.calls.allArgs()[0][1].body;
+            expect(actualBody).toEqual(expectedBody);
+        });
         it('send timeout to functions', async () => {
             const modelWithRequestOptions = new generative_models_1.GenerativeModel({
                 model: 'gemini-pro',
@@ -2015,7 +2098,7 @@ describe('ChatSession', () => {
             });
             await chatSessionWithRequestOptions.sendMessage(req);
             expect(chatSessionWithRequestOptions.requestOptions).toEqual(TEST_REQUEST_OPTIONS);
-            expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+            expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
         });
         it('returns a GenerateContentResponse and appends to history when startChat is passed with no args', async () => {
             const req = 'How are you doing today?';
@@ -2218,7 +2301,7 @@ describe('ChatSession', () => {
             });
             await chatSessionWithRequestOptions.sendMessageStream(req);
             expect(chatSessionWithRequestOptions.requestOptions).toEqual(TEST_REQUEST_OPTIONS);
-            expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+            expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
         });
         it('returns a FunctionCall and appends to history when passed a FunctionDeclaration', async () => {
             const functionCallChatMessage = 'What is the weather in LA?';
@@ -2265,6 +2348,7 @@ describe('ChatSessionPreview', () => {
     let chatSessionWithFunctionCall;
     let model;
     let expectedStreamResult;
+    let fetchSpy;
     beforeEach(async () => {
         model = new generative_models_1.GenerativeModelPreview({
             model: 'gemini-pro',
@@ -2285,7 +2369,7 @@ describe('ChatSessionPreview', () => {
             stream: testGenerator(),
         };
         const fetchResult = Promise.resolve(new Response(JSON.stringify(expectedStreamResult), fetchResponseObj));
-        spyOn(global, 'fetch').and.returnValue(fetchResult);
+        fetchSpy = spyOn(global, 'fetch').and.returnValue(fetchResult);
     });
     describe('sendMessage', () => {
         it('returns a GenerateContentResponse and appends to history', async () => {
@@ -2355,6 +2439,26 @@ describe('ChatSessionPreview', () => {
             // @ts-ignore
             expect(generateContentSpy.calls.allArgs()[0][1]).toEqual(expectedResourcePath);
         });
+        it('send a message with responseMimeType to functions', async () => {
+            const model = new generative_models_1.GenerativeModelPreview({
+                model: 'gemini-pro',
+                project: PROJECT,
+                location: LOCATION,
+                googleAuth: FAKE_GOOGLE_AUTH,
+            });
+            const chat = model.startChat({
+                generationConfig: {
+                    ...TEST_GENERATION_CONFIG,
+                    responseMimeType: 'application/json',
+                },
+            });
+            const req = 'How are you doing today?';
+            await chat.sendMessage(req);
+            const expectedBody = '{"contents":[{"role":"user","parts":[{"text":"How are you doing today?"}]}],"generationConfig":{"candidateCount":1,"stopSequences":["hello"],"responseMimeType":"application/json"}}';
+            // @ts-ignore
+            const actualBody = fetchSpy.calls.allArgs()[0][1].body;
+            expect(actualBody).toEqual(expectedBody);
+        });
         it('send timeout to functions', async () => {
             const modelWithRequestOptions = new generative_models_1.GenerativeModelPreview({
                 model: 'gemini-pro',
@@ -2372,7 +2476,7 @@ describe('ChatSessionPreview', () => {
             });
             await chatSessionWithRequestOptions.sendMessage(req);
             expect(chatSessionWithRequestOptions.requestOptions).toEqual(TEST_REQUEST_OPTIONS);
-            expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+            expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
         });
         it('returns a GenerateContentResponse and appends to history when startChat is passed with no args', async () => {
             const req = TEST_CHAT_MESSSAGE_TEXT;
@@ -2567,7 +2671,7 @@ describe('ChatSessionPreview', () => {
             });
             await chatSessionWithRequestOptions.sendMessageStream(req);
             expect(chatSessionWithRequestOptions.requestOptions).toEqual(TEST_REQUEST_OPTIONS);
-            expect(generateContentSpy.calls.allArgs()[0][8].timeout).toEqual(0);
+            expect(generateContentSpy.calls.allArgs()[0][9].timeout).toEqual(0);
         });
         it('returns a FunctionCall and appends to history when passed a FunctionDeclaration', async () => {
             const functionCallChatMessage = 'What is the weather in LA?';

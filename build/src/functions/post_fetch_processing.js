@@ -29,7 +29,8 @@ async function throwErrorIfNotOK(response) {
         const errorBody = await response.json();
         const errorMessage = `got status: ${status} ${statusText}. ${JSON.stringify(errorBody)}`;
         if (status >= 400 && status < 500) {
-            throw new errors_1.ClientError(errorMessage);
+            const error = new errors_1.ClientError(errorMessage, new errors_1.GoogleApiError(errorBody.error.message, errorBody.error.code, errorBody.error.status, errorBody.error.details));
+            throw error;
         }
         throw new errors_1.GoogleGenerativeAIError(errorMessage);
     }
@@ -230,7 +231,6 @@ function aggregateGroundingMetadataForCandidate(candidateChunk, aggregatedCandid
     }
     const emptyGroundingMetadata = {
         webSearchQueries: [],
-        groundingAttributions: [],
         retrievalQueries: [],
         groundingChunks: [],
         groundingSupports: [],
@@ -240,10 +240,6 @@ function aggregateGroundingMetadataForCandidate(candidateChunk, aggregatedCandid
     if (groundingMetadataChunk.webSearchQueries) {
         groundingMetadataAggregated.webSearchQueries =
             groundingMetadataAggregated.webSearchQueries.concat(groundingMetadataChunk.webSearchQueries);
-    }
-    if (groundingMetadataChunk.groundingAttributions) {
-        groundingMetadataAggregated.groundingAttributions =
-            groundingMetadataAggregated.groundingAttributions.concat(groundingMetadataChunk.groundingAttributions);
     }
     if (groundingMetadataChunk.retrievalQueries) {
         groundingMetadataAggregated.retrievalQueries =

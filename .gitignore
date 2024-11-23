@@ -1,7 +1,7 @@
 .env
 # Ignore directories generated automatically.
 node_modules/
-build/
+# build/
 docs/
 .nyc_output/
 

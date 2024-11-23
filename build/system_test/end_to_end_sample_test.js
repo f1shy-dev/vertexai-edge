@@ -229,6 +229,10 @@ describe('generateContentStream', () => {
             expect(e).toBeInstanceOf(src_1.ClientError);
             expect(e.message).toContain('[VertexAI.ClientError]: got status: 400 Bad Request', `sys test failure on generateContentStream when having bad request
           got wrong error message: ${e.message}`);
+            expect(e.cause).toBeInstanceOf(src_1.GoogleApiError);
+            expect(e.cause.code).toBe(400);
+            expect(e.cause.status).toBe('INVALID_ARGUMENT');
+            expect(e.cause.message).toBeInstanceOf(String);
         });
     });
     it('in preview should throw ClientError when having invalid input', async () => {
@@ -249,6 +253,10 @@ describe('generateContentStream', () => {
             expect(e).toBeInstanceOf(src_1.ClientError);
             expect(e.message).toContain('[VertexAI.ClientError]: got status: 400 Bad Request', `sys test failure on generateContentStream in preview when having bad request
           got wrong error message: ${e.message}`);
+            expect(e.cause).toBeInstanceOf(src_1.GoogleApiError);
+            expect(e.cause.code).toBe(400);
+            expect(e.cause.status).toBe('INVALID_ARGUMENT');
+            expect(e.cause.message).toBeInstanceOf(String);
         });
     });
     it('should should return a stream and aggregated response when passed multipart GCS content', async () => {
@@ -349,7 +357,6 @@ describe('generateContentStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContentStream for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContentStream for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContentStream for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -365,7 +372,6 @@ describe('generateContentStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContentStream for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContentStream for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContentStream for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -381,7 +387,6 @@ describe('generateContentStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContentStream in preview for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContentStream in preview for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContentStream in preview for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -397,11 +402,10 @@ describe('generateContentStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContentStream in preview for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContentStream in preview for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContentStream in preview for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
-    it('in preview should return grounding metadata when passed a VertexRagStore', async () => {
+    xit('in preview should return grounding metadata when passed a VertexRagStore', async () => {
         var _a, _b;
         const request = {
             contents: [
@@ -448,7 +452,6 @@ describe('generateContent', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContent for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContent for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContent for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -464,7 +467,6 @@ describe('generateContent', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContent for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContent for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContent for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -480,7 +482,6 @@ describe('generateContent', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContent in preview for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContent in preview for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContent in preview for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -496,7 +497,6 @@ describe('generateContent', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on generateContent in preview for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on generateContent in preview for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on generateContent in preview for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -528,7 +528,7 @@ describe('generateContent', () => {
         expect(resp.response.candidates[0]).toBeTruthy(`sys test failure on generateContentStream in preview, for resp ${JSON.stringify(resp)}`);
         expect((_a = resp.response.candidates[0].content.parts[0].text) === null || _a === void 0 ? void 0 : _a.toLowerCase()).toContain(WEATHER_FORECAST, `sys test failure on generateContentStream in preview for candidate part ${JSON.stringify(resp.response.candidates[0].content.parts[0])}`);
     });
-    it('in preview should return grounding metadata when passed a VertexRagStore', async () => {
+    xit('in preview should return grounding metadata when passed a VertexRagStore', async () => {
         var _a, _b;
         const request = {
             contents: [
@@ -609,7 +609,6 @@ describe('sendMessage', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on sendMessage for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on sendMessage for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on sendMessage for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -625,7 +624,6 @@ describe('sendMessage', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on sendMessage for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on sendMessage for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on sendMessage for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -640,7 +638,6 @@ describe('sendMessage', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on sendMessage in preview for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on sendMessage in preview for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on sendMessage in preview for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -656,7 +653,6 @@ describe('sendMessage', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on sendMessage in preview for grounding metadata: ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on sendMessage in preview for grounding attributions: ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on sendMessage in preview for web search queries: ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -768,7 +764,6 @@ describe('sendMessageStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on groundingMetadata, ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on groundingMetadata.groundingAttributions, ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on groundingMetadata.webSearchQueries, ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -784,7 +779,6 @@ describe('sendMessageStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on groundingMetadata, ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on groundingMetadata.groundingAttributions, ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on groundingMetadata.webSearchQueries, ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -799,7 +793,6 @@ describe('sendMessageStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on groundingMetadata in preview, ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on groundingMetadata.groundingAttributions in preview, ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on groundingMetadata.webSearchQueries in preview, ${groundingMetadata.webSearchQueries}`);
         }
     });
@@ -815,7 +808,6 @@ describe('sendMessageStream', () => {
         const groundingMetadata = response.candidates[0].groundingMetadata;
         expect(!!groundingMetadata).toBeTruthy(`sys test failure on groundingMetadata in preview, ${groundingMetadata}`);
         if (groundingMetadata) {
-            expect(!!groundingMetadata.groundingAttributions).toBeTruthy(`sys test failure on groundingMetadata.groundingAttributions in preview, ${groundingMetadata.groundingAttributions}`);
             expect(!!groundingMetadata.webSearchQueries).toBeTruthy(`sys test failure on groundingMetadata.webSearchQueries in preview, ${groundingMetadata.webSearchQueries}`);
         }
     });
