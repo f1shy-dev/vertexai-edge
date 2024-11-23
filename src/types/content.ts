@@ -17,6 +17,8 @@
 
 // @ts-nocheck
 import {GoogleAuth, GoogleAuthOptions} from '../../gauth-library-edge/index';
+import {ToolConfig} from './tool';
+import {SchemaType, Schema} from './common';
 
 /**
  * Params used to initialize the Vertex SDK.
@@ -60,6 +62,12 @@ export declare interface GenerateContentRequest extends BaseModelParams {
    * Note: only text should be used in parts of {@link Content}
    */
   systemInstruction?: string | Content;
+
+  /**
+   * Optional. The name of the cached content used as context to serve the prediction.
+   * This is the name of a `CachedContent` and not the cache object itself.
+   */
+  cachedContent?: string;
 }
 
 /**
@@ -113,6 +121,8 @@ export declare interface GetGenerativeModelParams extends ModelParams {
   safetySettings?: SafetySetting[];
   /** Optional. The tools to use for generation. */
   tools?: Tool[];
+  /** Optional. This config is shared for all tools provided in the request. */
+  toolConfig?: ToolConfig;
   /** Optional. The request options to use for generation. */
   requestOptions?: RequestOptions;
   /**
@@ -132,6 +142,13 @@ export declare interface ModelParams extends BaseModelParams {
    * @example "gemini-1.0-pro".
    */
   model: string;
+
+  /**
+   * Optional. The cached content used as context to serve the prediction.
+   * Note: only used in explicit caching, where users can have control over caching
+   * (e.g. what content to cache) and enjoy guaranteed cost savings.
+   */
+  cachedContent?: CachedContent;
 }
 
 /**
@@ -144,6 +161,8 @@ export declare interface BaseModelParams {
   generationConfig?: GenerationConfig;
   /** Optional. Array of {@link Tool}. */
   tools?: Tool[];
+  /** Optional. This config is shared for all tools provided in the request. */
+  toolConfig?: ToolConfig;
   /**
    * Optional. The user provided system instructions for the model.
    * Note: only text should be used in parts of {@link Content}
@@ -162,6 +181,13 @@ export declare interface SafetySetting {
 }
 
 /**
+ * Schema passed to `GenerationConfig.responseSchema`
+ * @public
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ResponseSchema extends Schema {}
+
+/**
  * Configuration options for model generation and outputs.
  */
 export declare interface GenerationConfig {
@@ -177,14 +203,28 @@ export declare interface GenerationConfig {
   topP?: number;
   /** Optional. If specified, topK sampling will be used. */
   topK?: number;
-  /** Optional. Output response mimetype of the generated candidate text.
+  /**
+   * Optional. Positive values penalize tokens that repeatedly appear in the generated text, decreasing the probability of repeating content.
+   * This maximum value for frequencyPenalty is up to, but not including, 2.0. Its minimum value is -2.0.
+   * Supported by gemini-1.5-pro and gemini-1.5-flash only. */
+  frequencyPenalty?: number;
+  /**
+   * Optional. Output response mimetype of the generated candidate text.
    * Supported mimetype:
    * - `text/plain`: (default) Text output.
    * - `application/json`: JSON response in the candidates.
    * The model needs to be prompted to output the appropriate response type,
    * otherwise the behavior is undefined.
-   * This is a preview feature. */
+   */
   responseMimeType?: string;
+
+  /**
+   * Optional. The schema that generated candidate text must follow.  For more
+   * information, see
+   * https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output.
+   * If set, a compatible responseMimeType must also be set.
+   */
+  responseSchema?: ResponseSchema;
 }
 
 /**
@@ -380,8 +420,8 @@ export interface FunctionCallPart extends BasePart {
 
 /**
  * A datatype containing media that is part of a multi-part {@link Content}
- * message. A `Part` is a union type of {@link TextPart}, {@link
- * InlineDataPart}, {@link FileDataPart}, and {@link FunctionResponsePart}. A
+ * message. A `Part` is a union type of {@link TextPart}, {@link InlineDataPart},
+ * {@link FileDataPart}, and {@link FunctionResponsePart}. A
  * `Part` has one of the following mutually exclusive fields:
  * 1. text
  * 2. inlineData
@@ -419,6 +459,8 @@ export declare interface UsageMetadata {
   candidatesTokenCount?: number;
   /** Optional. Total number of tokens. */
   totalTokenCount?: number;
+  /** Optional. Number of tokens in the cached content. */
+  cachedContentTokenCount?: number;
 }
 
 /**
@@ -618,7 +660,10 @@ export declare interface Citation {
  * Google search entry point.
  */
 export declare interface SearchEntryPoint {
-  /** Optional. Web content snippet that can be embedded in a web page or an app webview. */
+  /**
+   * Optional. Web content snippet that can be embedded in a web page or an app
+   * webview.
+   */
   renderedContent?: string;
   /** Optional. Base64 encoded JSON representing array of tuple. */
   sdkBlob?: string;
@@ -650,7 +695,9 @@ export declare interface GroundingChunkRetrievedContext {
 export declare interface GroundingChunk {
   /** Optional. Grounding chunk from the web. */
   web?: GroundingChunkWeb;
-  /** Optional. Grounding chunk from context retrieved by the retrieval tools. */
+  /**
+   * Optional. Grounding chunk from context retrieved by the retrieval tools.
+   */
   retrievedContext?: GroundingChunkRetrievedContext;
 }
 
@@ -660,11 +707,13 @@ export declare interface GroundingChunk {
 export declare interface GroundingSupportSegment {
   /** Optional. The index of a Part object within its parent Content object. */
   partIndex?: number;
-  /** Optional. Start index in the given Part, measured in bytes.
+  /**
+   * Optional. Start index in the given Part, measured in bytes.
    * Offset from the start of the Part, inclusive, starting at zero.
    */
   startIndex?: number;
-  /** Optional. End index in the given Part, measured in bytes.
+  /**
+   * Optional. End index in the given Part, measured in bytes.
    * Offset from the start of the Part, exclusive, starting at zero.
    */
   endIndex?: number;
@@ -678,13 +727,15 @@ export declare interface GroundingSupportSegment {
 export declare interface GroundingSupport {
   /** Optional. Segment of the content this support belongs to. */
   segment?: GroundingSupportSegment;
-  /** Optional. A arrau of indices (into {@link GroundingChunk}) specifying the
+  /**
+   * Optional. A arrau of indices (into {@link GroundingChunk}) specifying the
    * citations associated with the claim. For instance [1,3,4] means
    * that grounding_chunk[1], grounding_chunk[3],
    * grounding_chunk[4] are the retrieved content attributed to the claim.
    */
   groundingChunkIndices?: number[];
-  /** Confidence score of the support references. Ranges from 0 to 1. 1 is the
+  /**
+   * Confidence score of the support references. Ranges from 0 to 1. 1 is the
    * most confident. This list must have the same size as the
    * groundingChunkIndices.
    */
@@ -699,34 +750,15 @@ export declare interface GroundingMetadata {
   webSearchQueries?: string[];
   /** Optional. Queries executed by the retrieval tools. */
   retrievalQueries?: string[];
-  /** @deprecated
-   * Optional. Array of {@link GroundingAttribution}
-   */
-  groundingAttributions?: GroundingAttribution[];
   /** Optional. Google search entry for the following-up web searches. {@link SearchEntryPoint} */
   searchEntryPoint?: SearchEntryPoint;
-  /** Optional. Array of supporting references retrieved from specified grounding source. {@link GroundingChunk}. */
+  /**
+   * Optional. Array of supporting references retrieved from specified
+   * grounding source. {@link GroundingChunk}.
+   */
   groundingChunks?: GroundingChunk[];
   /** Optional. Array of grounding support. {@link GroundingSupport}. */
   groundingSupports?: GroundingSupport[];
-}
-
-/**
- * @deprecated
- * Grounding attribution.
- */
-export declare interface GroundingAttribution {
-  /** Optional. Attribution from the web. */
-  web?: GroundingAttributionWeb;
-  /** Optional. Attribution from context retrieved by the retrieval tools. */
-  retrievedContext?: GroundingAttributionRetrievedContext;
-  /** Optional. Segment of the content this attribution belongs to. */
-  segment?: GroundingAttributionSegment;
-  /**
-   * Optional. Confidence score of the attribution. Ranges from 0 to 1. 1 is
-   * the most confident.
-   */
-  confidenceScore?: number;
 }
 
 /**
@@ -874,7 +906,10 @@ export declare interface VertexRagStore {
   /** Optional. Number of top k results to return from the selected corpora. */
   similarityTopK?: number;
 
-  /** Optional. If set this field, results with vector distance smaller than this threshold will be returned. */
+  /**
+   * Optional. If set this field, results with vector distance smaller than
+   * this threshold will be returned.
+   */
   vectorDistanceThreshold?: number;
 }
 
@@ -935,15 +970,8 @@ export declare interface Retrieval {
 /**
  * Tool to retrieve public web data for grounding, powered by Google.
  */
-export declare interface GoogleSearchRetrieval {
-  /**
-   * @deprecated groundingAttributions field in {@link GroundingMetadata} is also deprecated.
-   * Optional. Disable using the result from this tool in detecting grounding
-   * attribution. This does not affect how the result is given to the model for
-   * generation.
-   */
-  disableAttribution?: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export declare interface GoogleSearchRetrieval {}
 
 /**
  * Retrieve from Vertex AI Search datastore for grounding.
@@ -963,27 +991,15 @@ export declare interface VertexAISearch {
  * Contains the list of OpenAPI data types
  * as defined by https://swagger.io/docs/specification/data-models/data-types/
  */
-export enum FunctionDeclarationSchemaType {
-  /** String type. */
-  STRING = 'STRING',
-  /** Number type. */
-  NUMBER = 'NUMBER',
-  /** Integer type. */
-  INTEGER = 'INTEGER',
-  /** Boolean type. */
-  BOOLEAN = 'BOOLEAN',
-  /** Array type. */
-  ARRAY = 'ARRAY',
-  /** Object type. */
-  OBJECT = 'OBJECT',
-}
+export declare type FunctionDeclarationSchemaType = SchemaType;
+export const FunctionDeclarationSchemaType = {...SchemaType};
 
 /**
  * Schema for parameters passed to {@link FunctionDeclaration.parameters}.
  */
 export interface FunctionDeclarationSchema {
   /** The type of the parameter. */
-  type: FunctionDeclarationSchemaType;
+  type: SchemaType;
   /** The format of the parameter. */
   properties: {[k: string]: FunctionDeclarationSchemaProperty};
   /** Optional. Description of the parameter. */
@@ -993,33 +1009,11 @@ export interface FunctionDeclarationSchema {
 }
 
 /**
- * Schema is used to define the format of input/output data.
- * Represents a select subset of an OpenAPI 3.0 schema object.
+ * FunctionDeclarationSchemaProperty is used to define the format of
+ * input/output data. Represents a select subset of an OpenAPI 3.0 schema object.
  * More fields may be added in the future as needed.
  */
-export interface FunctionDeclarationSchemaProperty {
-  /**
-   * Optional. The type of the property. {@link
-   * FunctionDeclarationSchemaType}.
-   */
-  type?: FunctionDeclarationSchemaType;
-  /** Optional. The format of the property. */
-  format?: string;
-  /** Optional. The description of the property. */
-  description?: string;
-  /** Optional. Whether the property is nullable. */
-  nullable?: boolean;
-  /** Optional. The items of the property. {@link FunctionDeclarationSchema} */
-  items?: FunctionDeclarationSchema;
-  /** Optional. The enum of the property. */
-  enum?: string[];
-  /** Optional. Map of {@link FunctionDeclarationSchema}. */
-  properties?: {[k: string]: FunctionDeclarationSchema};
-  /** Optional. Array of required property. */
-  required?: string[];
-  /** Optional. The example of the property. */
-  example?: unknown;
-}
+export type FunctionDeclarationSchemaProperty = Schema;
 
 /**
  * Params to initiate a multiturn chat with the model via startChat.
@@ -1033,6 +1027,8 @@ export declare interface StartChatParams {
   generationConfig?: GenerationConfig;
   /** Optional. Array of {@link Tool}. */
   tools?: Tool[];
+  /** Optional. This config is shared for all tools provided in the request. */
+  toolConfig?: ToolConfig;
   /** Optional. The base Vertex AI endpoint to use for the request. */
   apiEndpoint?: string;
   /**
@@ -1040,6 +1036,11 @@ export declare interface StartChatParams {
    * Note: only text should be used in parts of {@link Content}
    */
   systemInstruction?: string | Content;
+  /**
+   * Optional. The name of the cached content used as context to serve the prediction.
+   * This is the name of a `CachedContent` and not the cache object itself.
+   */
+  cachedContent?: string;
 }
 
 /**
@@ -1079,4 +1080,91 @@ export interface RequestOptions {
    * Value for custom HTTP headers to set on the HTTP request.
    */
   customHeaders?: Headers;
+}
+
+/**
+ * A resource used in LLM queries for users to explicitly specify
+ * what to cache and how to cache.
+ */
+export interface CachedContent {
+  /**
+   * Immutable. Identifier. The server-generated resource name of the cached content.
+   * Format: projects/{project}/locations/{location}/cachedContents/{cached_content}
+   */
+  name?: string;
+
+  /** Optional. Immutable. The user-generated meaningful display name of the cached content. */
+  displayName?: string;
+
+  /**
+   * Immutable. The name of the publisher model to use for cached content.
+   * Format: projects/{project}/locations/{location}/publishers/{publisher}/models/{model}
+   */
+  model?: string;
+
+  /** Developer set system instruction. Currently, text only. */
+  systemInstruction?: Content | string;
+
+  /** Optional. Input only. Immutable. The content to cache. */
+  contents?: Content[];
+
+  /** Optional. Input only. Immutable. A list of `Tools` the model may use to generate the next response. */
+  tools?: Tool[];
+
+  /** Optional. Input only. Immutable. Tool config. This config is shared for all tools. */
+  toolConfig?: ToolConfig;
+
+  /**
+   * Output only. Creatation time of the cache entry.
+   * Format: google-datetime. See {@link https://cloud.google.com/docs/discovery/type-format}
+   */
+  createTime?: string;
+
+  /**
+   * Output only. When the cache entry was last updated in UTC time.
+   * Format: google-datetime. See {@link https://cloud.google.com/docs/discovery/type-format}
+   */
+  updateTime?: string;
+
+  /** Output only. Metadata on the usage of the cached content. */
+  usageMetadata?: CachedContentUsageMetadata;
+
+  /**
+   * Timestamp of when this resource is considered expired.
+   * This is *always* provided on output, regardless of what was sent on input.
+   */
+  expireTime?: string;
+
+  /**
+   * Input only. The TTL seconds for this resource. The expiration time
+   * is computed: now + TTL.
+   * Format: google-duration. See {@link https://cloud.google.com/docs/discovery/type-format}
+   */
+  ttl?: string;
+}
+
+/** Metadata on the usage of the cached content. */
+export interface CachedContentUsageMetadata {
+  /** Total number of tokens that the cached content consumes. */
+  totalTokenCount?: number;
+
+  /** Number of text characters. */
+  textCount?: number;
+
+  /** Number of images. */
+  imageCount?: number;
+
+  /** Duration of video in seconds. */
+  videoDurationSeconds?: number;
+
+  /** Duration of audio in seconds. */
+  audioDurationSeconds?: number;
+}
+
+/** Response with a list of CachedContents. */
+export interface ListCachedContentsResponse {
+  /** List of cached contents. */
+  cachedContents?: CachedContent[];
+  /** A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages. */
+  nextPageToken?: string;
 }

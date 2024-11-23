@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-export * from './content';
-export * from './errors';
-export * from './tool';
-export * from './common';
-export {GenerateContentResponseHandler} from './generate_content_response_handler';
+import {GenerateContentResponse} from './sdk_schema_common_interface_contract';
+
+export interface GenerateContentResult {
+  response: GenerateContentResponse;
+}

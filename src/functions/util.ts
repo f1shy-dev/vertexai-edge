@@ -15,8 +15,18 @@
  * limitations under the License.
  */
 
-export * from './content';
-export * from './errors';
-export * from './tool';
-export * from './common';
-export {GenerateContentResponseHandler} from './generate_content_response_handler';
+import {Content} from '../types/content';
+import {constants} from '../util';
+
+export function formulateSystemInstructionIntoContent(
+  systemInstruction: string | Content
+): Content {
+  if (typeof systemInstruction === 'string') {
+    return {
+      role: constants.SYSTEM_ROLE,
+      parts: [{text: systemInstruction}],
+    } as Content;
+  }
+  systemInstruction.role = constants.SYSTEM_ROLE;
+  return systemInstruction;
+}

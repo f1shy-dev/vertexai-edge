@@ -18,13 +18,14 @@
 /* tslint:disable */
 import {GoogleAuth} from '../../gauth-library-edge/index';
 
-import {formulateSystemInstructionIntoContent} from './util';
+import {formulateSystemInstructionIntoContent} from '../functions/util';
 import {countTokens} from '../functions/count_tokens';
 import {
   generateContent,
   generateContentStream,
 } from '../functions/generate_content';
 import {
+  CachedContent,
   Content,
   CountTokensRequest,
   CountTokensResponse,
@@ -39,6 +40,7 @@ import {
   StreamGenerateContentResult,
   Tool,
 } from '../types/content';
+import {ToolConfig} from '../types/tool';
 import {ClientError, GoogleAuthError} from '../types/errors';
 import {constants} from '../util';
 
@@ -55,6 +57,7 @@ export class GenerativeModel {
   private readonly generationConfig?: GenerationConfig;
   private readonly safetySettings?: SafetySetting[];
   private readonly tools?: Tool[];
+  private readonly toolConfig?: ToolConfig;
   private readonly requestOptions?: RequestOptions;
   private readonly systemInstruction?: Content;
   private readonly project: string;
@@ -77,6 +80,7 @@ export class GenerativeModel {
     this.generationConfig = getGenerativeModelParams.generationConfig;
     this.safetySettings = getGenerativeModelParams.safetySettings;
     this.tools = getGenerativeModelParams.tools;
+    this.toolConfig = getGenerativeModelParams.toolConfig;
     this.requestOptions = getGenerativeModelParams.requestOptions ?? {};
     if (getGenerativeModelParams.systemInstruction) {
       this.systemInstruction = formulateSystemInstructionIntoContent(
@@ -140,6 +144,7 @@ export class GenerativeModel {
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     );
   }
@@ -186,6 +191,7 @@ export class GenerativeModel {
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     );
   }
@@ -251,6 +257,7 @@ export class GenerativeModel {
       publisherModelEndpoint: this.publisherModelEndpoint,
       resourcePath: this.resourcePath,
       tools: this.tools,
+      toolConfig: this.toolConfig,
       systemInstruction: this.systemInstruction,
     };
 
@@ -280,6 +287,7 @@ export class GenerativeModelPreview {
   private readonly generationConfig?: GenerationConfig;
   private readonly safetySettings?: SafetySetting[];
   private readonly tools?: Tool[];
+  private readonly toolConfig?: ToolConfig;
   private readonly requestOptions?: RequestOptions;
   private readonly systemInstruction?: Content;
   private readonly project: string;
@@ -288,6 +296,7 @@ export class GenerativeModelPreview {
   private readonly publisherModelEndpoint: string;
   private readonly resourcePath: string;
   private readonly apiEndpoint?: string;
+  private readonly cachedContent?: CachedContent;
 
   /**
    * @constructor
@@ -302,6 +311,8 @@ export class GenerativeModelPreview {
     this.generationConfig = getGenerativeModelParams.generationConfig;
     this.safetySettings = getGenerativeModelParams.safetySettings;
     this.tools = getGenerativeModelParams.tools;
+    this.toolConfig = getGenerativeModelParams.toolConfig;
+    this.cachedContent = getGenerativeModelParams.cachedContent;
     this.requestOptions = getGenerativeModelParams.requestOptions ?? {};
     if (getGenerativeModelParams.systemInstruction) {
       this.systemInstruction = formulateSystemInstructionIntoContent(
@@ -350,11 +361,13 @@ export class GenerativeModelPreview {
     request: GenerateContentRequest | string
   ): Promise<GenerateContentResult> {
     request = formulateRequestToGenerateContentRequest(request);
-    const formulatedRequest =
-      formulateSystemInstructionIntoGenerateContentRequest(
+    const formulatedRequest = {
+      ...formulateSystemInstructionIntoGenerateContentRequest(
         request,
         this.systemInstruction
-      );
+      ),
+      cachedContent: this.cachedContent?.name,
+    };
     return generateContent(
       this.location,
       this.resourcePath,
@@ -364,6 +377,7 @@ export class GenerativeModelPreview {
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     );
   }
@@ -396,11 +410,13 @@ export class GenerativeModelPreview {
     request: GenerateContentRequest | string
   ): Promise<StreamGenerateContentResult> {
     request = formulateRequestToGenerateContentRequest(request);
-    const formulatedRequest =
-      formulateSystemInstructionIntoGenerateContentRequest(
+    const formulatedRequest = {
+      ...formulateSystemInstructionIntoGenerateContentRequest(
         request,
         this.systemInstruction
-      );
+      ),
+      cachedContent: this.cachedContent?.name,
+    };
     return generateContentStream(
       this.location,
       this.resourcePath,
@@ -410,6 +426,7 @@ export class GenerativeModelPreview {
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     );
   }
@@ -476,6 +493,7 @@ export class GenerativeModelPreview {
       resourcePath: this.resourcePath,
       tools: this.tools,
       systemInstruction: this.systemInstruction,
+      cachedContent: this.cachedContent?.name,
     };
 
     if (request) {
@@ -487,8 +505,22 @@ export class GenerativeModelPreview {
       startChatRequest.tools = request.tools ?? this.tools;
       startChatRequest.systemInstruction =
         request.systemInstruction ?? this.systemInstruction;
+      startChatRequest.cachedContent =
+        request.cachedContent ?? this.cachedContent?.name;
     }
     return new ChatSessionPreview(startChatRequest, this.requestOptions);
+  }
+
+  getModelName(): string {
+    return this.model;
+  }
+
+  getCachedContent(): CachedContent | undefined {
+    return this.cachedContent;
+  }
+
+  getSystemInstruction(): Content | undefined {
+    return this.systemInstruction;
   }
 }
 

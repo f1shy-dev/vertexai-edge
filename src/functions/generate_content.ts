@@ -15,12 +15,6 @@
  * limitations under the License.
  */
 
-/**
- * Make a async call to generate content.
- * @param request A GenerateContentRequest object with the request contents.
- * @returns The GenerateContentResponse object with the response candidates.
- */
-
 import {
   GenerateContentRequest,
   GenerateContentResult,
@@ -31,6 +25,7 @@ import {
   Tool,
 } from '../types/content';
 import {GoogleGenerativeAIError} from '../types/errors';
+import {ToolConfig} from '../types/tool';
 import * as constants from '../util/constants';
 
 import {
@@ -47,6 +42,11 @@ import {
   getApiVersion,
 } from './pre_fetch_processing';
 
+/**
+ * Make a async call to generate content.
+ * @param request A GenerateContentRequest object with the request contents.
+ * @returns The GenerateContentResponse object with the response candidates.
+ */
 export async function generateContent(
   location: string,
   resourcePath: string,
@@ -56,6 +56,7 @@ export async function generateContent(
   generationConfig?: GenerationConfig,
   safetySettings?: SafetySetting[],
   tools?: Tool[],
+  toolConfig?: ToolConfig,
   requestOptions?: RequestOptions
 ): Promise<GenerateContentResult> {
   request = formatContentRequest(request, generationConfig, safetySettings);
@@ -71,9 +72,11 @@ export async function generateContent(
   const generateContentRequest: GenerateContentRequest = {
     contents: request.contents,
     systemInstruction: request.systemInstruction,
+    cachedContent: request.cachedContent,
     generationConfig: request.generationConfig ?? generationConfig,
     safetySettings: request.safetySettings ?? safetySettings,
     tools: request.tools ?? tools,
+    toolConfig: request.toolConfig ?? toolConfig,
   };
   const response: Response | undefined = await postRequest({
     region: location,
@@ -109,6 +112,7 @@ export async function generateContentStream(
   generationConfig?: GenerationConfig,
   safetySettings?: SafetySetting[],
   tools?: Tool[],
+  toolConfig?: ToolConfig,
   requestOptions?: RequestOptions
 ): Promise<StreamGenerateContentResult> {
   request = formatContentRequest(request, generationConfig, safetySettings);
@@ -123,9 +127,11 @@ export async function generateContentStream(
   const generateContentRequest: GenerateContentRequest = {
     contents: request.contents,
     systemInstruction: request.systemInstruction,
+    cachedContent: request.cachedContent,
     generationConfig: request.generationConfig ?? generationConfig,
     safetySettings: request.safetySettings ?? safetySettings,
     tools: request.tools ?? tools,
+    toolConfig: request.toolConfig ?? toolConfig,
   };
   const response = await postRequest({
     region: location,
