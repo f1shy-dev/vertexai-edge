@@ -4,7 +4,7 @@
     "rootDir": ".",
     "outDir": "build",
     "resolveJsonModule": true,
-    "lib": ["es2018", "dom", "dom.iterable"],
+    "lib": ["es2022", "dom", "dom.iterable"],
     "baseUrl": ".",
     "paths": {
       "~google-auth-library": ["./gauth-library-edge/index.ts"]

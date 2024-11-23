@@ -18,7 +18,7 @@
 /* tslint:disable */
 import {GoogleAuth} from '../../gauth-library-edge/index';
 
-import {formulateSystemInstructionIntoContent} from './util';
+import {formulateSystemInstructionIntoContent} from '../functions/util';
 import {
   generateContent,
   generateContentStream,
@@ -35,6 +35,7 @@ import {
   StreamGenerateContentResult,
   Tool,
 } from '../types/content';
+import {ToolConfig} from '../types';
 import {ClientError, GoogleAuthError} from '../types/errors';
 import {constants} from '../util';
 
@@ -57,6 +58,7 @@ export class ChatSession {
   private readonly generationConfig?: GenerationConfig;
   private readonly safetySettings?: SafetySetting[];
   private readonly tools?: Tool[];
+  private readonly toolConfig?: ToolConfig;
   private readonly apiEndpoint?: string;
   private readonly systemInstruction?: Content;
 
@@ -80,6 +82,7 @@ export class ChatSession {
     this.generationConfig = request.generationConfig;
     this.safetySettings = request.safetySettings;
     this.tools = request.tools;
+    this.toolConfig = request.toolConfig;
     this.apiEndpoint = request.apiEndpoint;
     this.requestOptions = requestOptions ?? {};
     if (request.systemInstruction) {
@@ -130,6 +133,7 @@ export class ChatSession {
       safetySettings: this.safetySettings,
       generationConfig: this.generationConfig,
       tools: this.tools,
+      toolConfig: this.toolConfig,
       systemInstruction: this.systemInstruction,
     };
 
@@ -142,6 +146,7 @@ export class ChatSession {
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     ).catch(e => {
       throw e;
@@ -213,6 +218,7 @@ export class ChatSession {
       safetySettings: this.safetySettings,
       generationConfig: this.generationConfig,
       tools: this.tools,
+      toolConfig: this.toolConfig,
       systemInstruction: this.systemInstruction,
     };
 
@@ -225,6 +231,7 @@ export class ChatSession {
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     ).catch(e => {
       throw e;
@@ -261,8 +268,10 @@ export class ChatSessionPreview {
   private readonly generationConfig?: GenerationConfig;
   private readonly safetySettings?: SafetySetting[];
   private readonly tools?: Tool[];
+  private readonly toolConfig?: ToolConfig;
   private readonly apiEndpoint?: string;
   private readonly systemInstruction?: Content;
+  private readonly cachedContent?: string;
 
   async getHistory(): Promise<Content[]> {
     return Promise.resolve(this.historyInternal);
@@ -284,8 +293,10 @@ export class ChatSessionPreview {
     this.generationConfig = request.generationConfig;
     this.safetySettings = request.safetySettings;
     this.tools = request.tools;
+    this.toolConfig = request.toolConfig;
     this.apiEndpoint = request.apiEndpoint;
     this.requestOptions = requestOptions ?? {};
+    this.cachedContent = request.cachedContent;
     if (request.systemInstruction) {
       this.systemInstruction = formulateSystemInstructionIntoContent(
         request.systemInstruction
@@ -333,6 +344,7 @@ export class ChatSessionPreview {
       safetySettings: this.safetySettings,
       generationConfig: this.generationConfig,
       tools: this.tools,
+      toolConfig: this.toolConfig,
       systemInstruction: this.systemInstruction,
     };
 
@@ -345,6 +357,7 @@ export class ChatSessionPreview {
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     ).catch(e => {
       throw e;
@@ -412,23 +425,26 @@ export class ChatSessionPreview {
   ): Promise<StreamGenerateContentResult> {
     const newContent: Content[] =
       formulateNewContentFromSendMessageRequest(request);
-    const generateContentrequest: GenerateContentRequest = {
+    const generateContentRequest: GenerateContentRequest = {
       contents: this.historyInternal.concat(newContent),
       safetySettings: this.safetySettings,
       generationConfig: this.generationConfig,
       tools: this.tools,
+      toolConfig: this.toolConfig,
       systemInstruction: this.systemInstruction,
+      cachedContent: this.cachedContent,
     };
 
     const streamGenerateContentResultPromise = generateContentStream(
       this.location,
       this.resourcePath,
       this.fetchToken(),
-      generateContentrequest,
+      generateContentRequest,
       this.apiEndpoint,
       this.generationConfig,
       this.safetySettings,
       this.tools,
+      this.toolConfig,
       this.requestOptions
     ).catch(e => {
       throw e;

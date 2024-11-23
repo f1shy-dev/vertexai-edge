@@ -16,6 +16,7 @@
  */
 
 import {
+  ClientError,
   CountTokensRequest,
   FinishReason,
   FunctionDeclarationSchemaType,
@@ -23,6 +24,7 @@ import {
   GenerateContentResponse,
   GenerateContentResponseHandler,
   GenerateContentResult,
+  GoogleApiError,
   HarmBlockThreshold,
   HarmCategory,
   HarmProbability,
@@ -31,6 +33,7 @@ import {
   SafetySetting,
   StreamGenerateContentResult,
   Tool,
+  ToolConfig,
 } from '../../types';
 import {constants} from '../../util';
 import {countTokens} from '../count_tokens';
@@ -193,6 +196,8 @@ const TEST_MULTIPART_MESSAGE_BASE64 = [
 
 const TEST_EMPTY_TOOLS: Tool[] = [];
 
+const TEST_EMPTY_TOOL_CONFIG: ToolConfig = {};
+
 const TEST_TOOLS_WITH_FUNCTION_DECLARATION: Tool[] = [
   {
     functionDeclarations: [
@@ -321,22 +326,32 @@ describe('countTokens', () => {
       ok: false,
     };
     const body = {
-      code: 400,
-      message: 'request is invalid',
-      status: 'INVALID_ARGUMENT',
+      error: {
+        code: 400,
+        message: 'request is invalid',
+        status: 'INVALID_ARGUMENT',
+      },
     };
     const response = new Response(JSON.stringify(body), fetch400Obj);
     spyOn(global, 'fetch').and.resolveTo(response);
 
-    await expectAsync(
-      countTokens(
+    let error: any;
+    try {
+      await countTokens(
         TEST_LOCATION,
         TEST_RESOURCE_PATH,
         TEST_TOKEN_PROMISE,
         req,
         TEST_API_ENDPOINT
-      )
-    ).toBeRejected();
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(ClientError);
+    expect(error.cause).toBeInstanceOf(GoogleApiError);
+    expect(error.cause.code).toBe(400);
+    expect(error.cause.status).toEqual('INVALID_ARGUMENT');
   });
 });
 
@@ -366,6 +381,7 @@ describe('generateContent', () => {
         TEST_GENERATION_CONFIG,
         TEST_SAFETY_SETTINGS,
         TEST_EMPTY_TOOLS,
+        TEST_EMPTY_TOOL_CONFIG,
         TEST_REQUEST_OPTIONS
       )
     ).toBeRejected();
@@ -684,6 +700,7 @@ describe('generateContentStream', () => {
         TEST_GENERATION_CONFIG,
         TEST_SAFETY_SETTINGS,
         TEST_EMPTY_TOOLS,
+        TEST_EMPTY_TOOL_CONFIG,
         TEST_REQUEST_OPTIONS
       )
     ).toBeRejected();

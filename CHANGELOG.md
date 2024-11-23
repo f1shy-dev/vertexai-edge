@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.9.0](https://github.com/googleapis/nodejs-vertexai/compare/v1.8.1...v1.9.0) (2024-10-14)
+
+
+### Features
+
+* Add Context Cache support for ChatSessionPreview class ([#433](https://github.com/googleapis/nodejs-vertexai/issues/433)) ([f8a3bdf](https://github.com/googleapis/nodejs-vertexai/commit/f8a3bdf55b6ee694a8fd41df29bdba54d7f8cdc2))
+
+
+### Documentation
+
+* update README ([a052132](https://github.com/googleapis/nodejs-vertexai/commit/a052132b91bad5ee9a42c6fe2057afceab36b542))
+
+## [1.8.1](https://github.com/googleapis/nodejs-vertexai/compare/v1.8.0...v1.8.1) (2024-09-25)
+
+
+### Bug Fixes
+
+* Fix cached contents list url ([2c4b769](https://github.com/googleapis/nodejs-vertexai/commit/2c4b7692e369385e5cd82a9b753d037d31e4e8ce))
+
+## [1.8.0](https://github.com/googleapis/nodejs-vertexai/compare/v1.7.0...v1.8.0) (2024-09-18)
+
+
+### Features
+
+* Add CachedContent resource to Vertex AI client library. ([8c8963e](https://github.com/googleapis/nodejs-vertexai/commit/8c8963e5c62bf491d5a47f7c5a0db64fafaea0cd))
+* Implement cached_content with generateContent methods ([c604b8c](https://github.com/googleapis/nodejs-vertexai/commit/c604b8caf4138537b38bdf9f57e8086d55216981))
+
+## [1.7.0](https://github.com/googleapis/nodejs-vertexai/compare/v1.6.0...v1.7.0) (2024-08-30)
+
+
+### Features
+
+* Add GoogleApi error in ClientError.cause ([d5c67bd](https://github.com/googleapis/nodejs-vertexai/commit/d5c67bdbb7d40f0c8eecca505c90bac21e4fe36d))
+
+## [1.6.0](https://github.com/googleapis/nodejs-vertexai/compare/v1.5.0...v1.6.0) (2024-08-26)
+
+
+### Features
+
+* Add responseSchema to GenerateContentRequest. ([d3715da](https://github.com/googleapis/nodejs-vertexai/commit/d3715daa793fda8063b379d16a0bf844a90b4087))
+* Add tool config ([f618132](https://github.com/googleapis/nodejs-vertexai/commit/f618132b7b5f9a05ba32b5968ccec14c9c18baaa))
+
+## [1.5.0](https://github.com/googleapis/nodejs-vertexai/compare/v1.4.1...v1.5.0) (2024-08-21)
+
+
+### Features
+
+* missing property frequencyPenalty in type defintions ([#394](https://github.com/googleapis/nodejs-vertexai/issues/394)) ([7557a83](https://github.com/googleapis/nodejs-vertexai/commit/7557a839b96a9fddc17c6516dd9c8c12772b6c59))
+
+## [1.4.1](https://github.com/googleapis/nodejs-vertexai/compare/v1.4.0...v1.4.1) (2024-08-09)
+
+
+### Bug Fixes
+
+* Fix docstring order and add node version badge in README ([d330fe3](https://github.com/googleapis/nodejs-vertexai/commit/d330fe3352713226794ac3e8c7a7a21474a32ec1))
+
 ## [1.4.0](https://github.com/googleapis/nodejs-vertexai/compare/v1.3.0...v1.4.0) (2024-07-15)
 
 
